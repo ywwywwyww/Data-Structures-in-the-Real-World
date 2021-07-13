@@ -1,66 +1,86 @@
 #pragma once
 #include <iostream>
 #include <list>
+#include <memory>
 
 #include "CustomClass.h"
 
+class Object;
+
 class Content {
+ public:
   virtual void output(std::ostream &out) { // virtual function for output
     std::cout << "the operator is not supported for this type." << std::endl;
   }
 };
 
 class IntContent : public Content {
-private:
+ private:
   int x;
 
-public:
+ public:
   IntContent(int _x) : x(_x) {}
-  void output(const std::ostream &out) { //???
+  void output(std::ostream &out) {
     out << x;
+  }
+
+  IntContent &operator+=(int y) {
+    this->x += y;
+    return *this;
   }
 };
 class StringContent : public Content {
-private:
+ private:
   std::string x;
 
-public:
+ public:
   StringContent(std::string _x) : x(_x) {}
-  void output(const std::ostream &out) { //???
+  void output(std::ostream &out) {
     out << x;
   }
+
+  StringContent &operator+=(std::string y) {
+    this->x += y;
+    return *this;
+  }
 };
-// The following codes are not working
-// class VectorContent: public Content
-// {
-// private:
-// 	std::vector<Object> x; //Object is not defined???
-// public:
-// 	VectorContent(const std::vector<Object>& _x): x(_x) {}
-// };
+
+class VectorContent : public Content {
+ private:
+  std::vector<Object> x;
+ public:
+  VectorContent(const std::vector<Object> &_x) : x(_x) {}
+  Object &operator[](int pos) {
+    return x[pos];
+  }
+};
+
 class CustomContent : public Content {
-private:
+ private:
   CustomClass x;
 
-public:
+ public:
   CustomContent(const CustomClass &_x) : x(_x) {}
 };
 
 class Object {
-private:
-  Content *pt;
+ private:
+  std::shared_ptr<Content> pt;
 
-public:
+ public:
   Object() {}
   Object(int x) {
-    pt = new int(x); // where to delete? maybe use std::shared_ptr?
+    pt = std::make_shared<IntContent>(x);
   }
-  Object(const std::string &x) { pt = new StringContent(x); }
-  // The following codes are not working
-  // Object(const std::vector<Object> &x){
-  // 	pt = new VectorContent(x);
-  // }
-  Object(const CustomClass &x) { pt = new CustomContent(x); }
+  Object(const std::string &x) {
+    pt = std::make_shared<StringContent>(x);
+  }
+  Object(const std::vector<Object> &x) {
+    pt = std::make_shared<VectorContent>(x);
+  }
+  Object(const CustomClass &x) {
+    pt = std::make_shared<CustomContent>(x);
+  }
 
   friend std::ostream &operator<<(std::ostream &out, const Object &obj) {
     obj.pt->output(out);
@@ -68,13 +88,16 @@ public:
   }
 
   Object &operator+=(int y) {
-    pt->operator+=(y);
+    (dynamic_cast<IntContent *>(pt.get()))->operator+=(y);
     return *this;
   }
   Object &operator+=(const std::string &y) {
-    pt->operator+=(y);
+    (dynamic_cast<StringContent *>(pt.get()))->operator+=(y);
     return *this;
   }
 
+  Object &operator[](const int &pos) {
+    return (*(dynamic_cast<VectorContent *>(pt.get())))[pos];
+  }
   // need more operators......
 };

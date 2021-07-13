@@ -4,11 +4,11 @@
 #include <string>
 
 class CustomClass {
-private:
+ private:
   std::string name;
   static std::map<std::string, int> cnt;
 
-public:
+ public:
   CustomClass(const std::string &_name) : name(_name) {
     cnt[name] += 1;
     // std::cout << name << " created" << std::endl;
