@@ -1,0 +1,17 @@
+
+ Performance counter stats for process id '15409':
+
+          2,828.48 msec task-clock                #    0.707 CPUs utilized          
+    11,808,731,686      cycles                    #    4.175 GHz                      (49.84%)
+     5,298,915,773      instructions              #    0.45  insn per cycle           (49.84%)
+       315,232,388      cache-references          #  111.449 M/sec                    (49.87%)
+       141,606,489      cache-misses              #   44.921 % of all cache refs      (50.01%)
+     1,146,352,332      L1-dcache-loads           #  405.289 M/sec                    (50.15%)
+       174,951,190      L1-dcache-load-misses     #   15.26% of all L1-dcache hits    (50.16%)
+        16,412,294      L1-icache-loads           #    5.803 M/sec                    (50.16%)
+           334,878      L1-icache-load-misses     #    2.04% of all L1-icache hits    (50.13%)
+     1,518,384,792      branches                  #  536.820 M/sec                    (49.99%)
+        61,678,437      branch-misses             #    4.06% of all branches          (49.85%)
+
+       4.000408966 seconds time elapsed
+

@@ -1,0 +1,17 @@
+
+ Performance counter stats for process id '15748':
+
+          2,494.80 msec task-clock                #    0.831 CPUs utilized          
+    10,416,950,670      cycles                    #    4.175 GHz                      (49.82%)
+     6,504,083,735      instructions              #    0.62  insn per cycle           (49.98%)
+       328,210,737      cache-references          #  131.558 M/sec                    (50.14%)
+       125,825,341      cache-misses              #   38.337 % of all cache refs      (50.30%)
+     1,314,868,794      L1-dcache-loads           #  527.044 M/sec                    (50.34%)
+       180,447,059      L1-dcache-load-misses     #   13.72% of all L1-dcache hits    (50.18%)
+        28,990,312      L1-icache-loads           #   11.620 M/sec                    (50.02%)
+           378,199      L1-icache-load-misses     #    1.30% of all L1-icache hits    (49.86%)
+     1,873,288,299      branches                  #  750.877 M/sec                    (49.70%)
+        62,247,114      branch-misses             #    3.32% of all branches          (49.66%)
+
+       3.000407007 seconds time elapsed
+

@@ -1,0 +1,17 @@
+
+ Performance counter stats for process id '15344':
+
+          2,850.30 msec task-clock                #    0.712 CPUs utilized          
+    11,843,753,888      cycles                    #    4.155 GHz                      (49.84%)
+     4,294,616,262      instructions              #    0.36  insn per cycle           (49.98%)
+       351,436,241      cache-references          #  123.298 M/sec                    (50.12%)
+       153,474,796      cache-misses              #   43.671 % of all cache refs      (50.22%)
+     1,072,688,874      L1-dcache-loads           #  376.342 M/sec                    (50.22%)
+       184,958,799      L1-dcache-load-misses     #   17.24% of all L1-dcache hits    (50.16%)
+        31,612,703      L1-icache-loads           #   11.091 M/sec                    (50.02%)
+           409,678      L1-icache-load-misses     #    1.30% of all L1-icache hits    (49.88%)
+     1,239,203,284      branches                  #  434.762 M/sec                    (49.78%)
+        69,077,996      branch-misses             #    5.57% of all branches          (49.78%)
+
+       4.000442467 seconds time elapsed
+

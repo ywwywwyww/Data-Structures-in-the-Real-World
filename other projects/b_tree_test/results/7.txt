@@ -1,0 +1,17 @@
+
+ Performance counter stats for process id '15019':
+
+          4,702.68 msec task-clock                #    0.784 CPUs utilized          
+    19,516,036,808      cycles                    #    4.150 GHz                      (49.86%)
+     2,729,111,130      instructions              #    0.14  insn per cycle           (49.88%)
+     1,035,126,022      cache-references          #  220.114 M/sec                    (49.96%)
+       397,761,645      cache-misses              #   38.426 % of all cache refs      (50.05%)
+     1,254,679,826      L1-dcache-loads           #  266.801 M/sec                    (50.13%)
+       435,977,025      L1-dcache-load-misses     #   34.75% of all L1-dcache hits    (50.14%)
+        65,676,654      L1-icache-loads           #   13.966 M/sec                    (50.12%)
+         1,000,406      L1-icache-load-misses     #    1.52% of all L1-icache hits    (50.04%)
+       859,840,969      branches                  #  182.841 M/sec                    (49.95%)
+       110,520,565      branch-misses             #   12.85% of all branches          (49.87%)
+
+       6.000715590 seconds time elapsed
+

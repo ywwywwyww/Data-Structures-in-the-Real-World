@@ -1,0 +1,17 @@
+
+ Performance counter stats for process id '15422':
+
+          2,623.40 msec task-clock                #    0.656 CPUs utilized          
+    10,887,896,144      cycles                    #    4.150 GHz                      (49.73%)
+     5,210,934,973      instructions              #    0.48  insn per cycle           (49.80%)
+       537,769,325      cache-references          #  204.989 M/sec                    (49.96%)
+       192,103,574      cache-misses              #   35.722 % of all cache refs      (50.11%)
+     1,105,452,895      L1-dcache-loads           #  421.382 M/sec                    (50.26%)
+       265,578,089      L1-dcache-load-misses     #   24.02% of all L1-dcache hits    (50.27%)
+        34,819,189      L1-icache-loads           #   13.273 M/sec                    (50.20%)
+           497,671      L1-icache-load-misses     #    1.43% of all L1-icache hits    (50.04%)
+     1,509,818,651      branches                  #  575.519 M/sec                    (49.89%)
+        61,125,721      branch-misses             #    4.05% of all branches          (49.74%)
+
+       4.000419062 seconds time elapsed
+

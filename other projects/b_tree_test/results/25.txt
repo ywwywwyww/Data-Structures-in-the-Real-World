@@ -1,0 +1,17 @@
+
+ Performance counter stats for process id '15315':
+
+          2,744.33 msec task-clock                #    0.686 CPUs utilized          
+    11,430,730,356      cycles                    #    4.165 GHz                      (49.76%)
+     4,002,010,740      instructions              #    0.35  insn per cycle           (49.76%)
+       518,634,786      cache-references          #  188.984 M/sec                    (49.87%)
+       198,269,112      cache-misses              #   38.229 % of all cache refs      (50.02%)
+     1,025,808,040      L1-dcache-loads           #  373.791 M/sec                    (50.16%)
+       257,792,652      L1-dcache-load-misses     #   25.13% of all L1-dcache hits    (50.24%)
+        33,126,214      L1-icache-loads           #   12.071 M/sec                    (50.24%)
+           463,377      L1-icache-load-misses     #    1.40% of all L1-icache hits    (50.13%)
+     1,162,562,756      branches                  #  423.623 M/sec                    (49.98%)
+        70,945,031      branch-misses             #    6.10% of all branches          (49.84%)
+
+       4.000438166 seconds time elapsed
+

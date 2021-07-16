@@ -1,0 +1,17 @@
+
+ Performance counter stats for process id '15080':
+
+          3,258.41 msec task-clock                #    0.652 CPUs utilized          
+    13,517,820,295      cycles                    #    4.149 GHz                      (49.79%)
+     3,270,606,628      instructions              #    0.24  insn per cycle           (49.91%)
+       432,654,324      cache-references          #  132.781 M/sec                    (50.04%)
+       187,184,253      cache-misses              #   43.264 % of all cache refs      (50.16%)
+     1,210,504,007      L1-dcache-loads           #  371.501 M/sec                    (50.28%)
+       207,055,035      L1-dcache-load-misses     #   17.10% of all L1-dcache hits    (50.21%)
+        42,929,583      L1-icache-loads           #   13.175 M/sec                    (50.09%)
+           486,570      L1-icache-load-misses     #    1.13% of all L1-icache hits    (49.96%)
+       967,479,120      branches                  #  296.917 M/sec                    (49.84%)
+        88,927,722      branch-misses             #    9.19% of all branches          (49.72%)
+
+       5.000429878 seconds time elapsed
+

@@ -1,0 +1,17 @@
+
+ Performance counter stats for process id '15853':
+
+          3,461.82 msec task-clock                #    0.865 CPUs utilized          
+    14,297,107,892      cycles                    #    4.130 GHz                      (49.78%)
+    23,761,615,513      instructions              #    1.66  insn per cycle           (49.87%)
+       547,950,073      cache-references          #  158.284 M/sec                    (49.98%)
+       114,063,689      cache-misses              #   20.816 % of all cache refs      (50.10%)
+     3,566,153,428      L1-dcache-loads           # 1030.138 M/sec                    (50.22%)
+       253,545,325      L1-dcache-load-misses     #    7.11% of all L1-dcache hits    (50.22%)
+        49,628,076      L1-icache-loads           #   14.336 M/sec                    (50.13%)
+           804,525      L1-icache-load-misses     #    1.62% of all L1-icache hits    (50.02%)
+     6,798,532,689      branches                  # 1963.859 M/sec                    (49.90%)
+        40,203,263      branch-misses             #    0.59% of all branches          (49.78%)
+
+       4.000449433 seconds time elapsed
+
