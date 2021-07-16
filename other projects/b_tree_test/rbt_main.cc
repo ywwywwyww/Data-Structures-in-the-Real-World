@@ -20,7 +20,7 @@ int main() {
     rbt_set.insert(a[i]);
   }
 
-  std::cout << "press enter key to continue" << std::endl;
+  std::cout << "press enter key to continue...";
   std::cin.get();
 
   int sum = 0;

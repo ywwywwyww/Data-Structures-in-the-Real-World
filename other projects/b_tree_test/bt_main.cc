@@ -10,7 +10,7 @@
 int a[10000010];
 
 int main() {
-  const int m = 29;
+  const int m = 7;
   std::cout << sizeof(BTreeNode<int, m>) << std::endl;
   srand(0);
   int n = 10000000;
@@ -22,7 +22,7 @@ int main() {
     bt_set.Insert(a[i]);
   }
 
-  std::cout << "press enter key to continue" << std::endl;
+  std::cout << "press enter key to continue..";
   std::cin.get();
 
   int sum = 0;
