@@ -48,10 +48,8 @@ $10^7$ 次查询
 
        7.000584882 seconds time elapsed
 
-2020011000@w3:~/dsrw/other projects/b_tree_test$
+2020011000@w3:~/dsrw/other projects/b_tree_test$可以看出 `B Tree ` 的 `L1-dcache` 的命中率高出了不少。
 ```
-
-可以看出 `B Tree ` 的 `L1-dcache` 的命中率高出了不少。
 
 
 
