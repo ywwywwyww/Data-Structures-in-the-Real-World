@@ -57,5 +57,24 @@ $10^7$ 次查询
 
 在调整了块大小之后，当阶数 `m=111` 时 能跑出 `2.270s`，比红黑树快了 `4.435x`.
 
+```shell
+
+ Performance counter stats for process id '15813':
+
+          2,270.28 msec task-clock                #    0.757 CPUs utilized          
+     9,469,385,284      cycles                    #    4.171 GHz                      (49.83%)
+     9,102,713,936      instructions              #    0.96  insn per cycle           (49.83%)
+       444,582,408      cache-references          #  195.827 M/sec                    (49.83%)
+       142,199,531      cache-misses              #   31.985 % of all cache refs      (49.86%)
+     1,536,226,932      L1-dcache-loads           #  676.669 M/sec                    (50.04%)
+       218,731,554      L1-dcache-load-misses     #   14.24% of all L1-dcache hits    (50.17%)
+        18,004,353      L1-icache-loads           #    7.930 M/sec                    (50.17%)
+           476,000      L1-icache-load-misses     #    2.64% of all L1-icache hits    (50.17%)
+     2,600,702,488      branches                  # 1145.544 M/sec                    (50.14%)
+        50,667,378      branch-misses             #    1.95% of all branches          (49.96%)
+
+       3.000377804 seconds time elapsed
+```
+
 详细结果见目录下的 `results` 文件夹.
 
