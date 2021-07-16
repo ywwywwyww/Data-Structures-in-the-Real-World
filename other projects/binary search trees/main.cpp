@@ -1,6 +1,6 @@
 #include <iostream>
 #include <set>
-#include "b_tree.h"
+#include "b_tree_with_ptr.h"
 
 int main() {
   int seed = 0;

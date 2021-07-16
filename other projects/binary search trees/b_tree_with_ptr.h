@@ -19,26 +19,26 @@ class BTree;
  * @tparam M The maximal number of children a node can have.
  */
 template<typename T, int M>
-class BTreeNode final {
+class BTreeNodeWithPtr final {
  public:
-  BTreeNode() : num_keys_{0}, is_leaf_{0} {
+  BTreeNodeWithPtr() : num_keys_{0}, is_leaf_{0} {
     memset(keys_, 0, sizeof(keys_));
     memset(children_, 0, sizeof(children_));
   }
 
   bool Insert(const T &key) {
     int cur_key_pos;
-    for (cur_key_pos = 0; cur_key_pos < num_keys_ && keys_[cur_key_pos] < key;) {
+    for (cur_key_pos = 0; cur_key_pos < num_keys_ && *keys_[cur_key_pos] < key;) {
       cur_key_pos += 1;
     }
-    if (cur_key_pos < num_keys_ && !(key < keys_[cur_key_pos]) && !(keys_[cur_key_pos] < key)) { // Equal
+    if (cur_key_pos < num_keys_ && !(key < *keys_[cur_key_pos]) && !(*keys_[cur_key_pos] < key)) { // Equal
       return false;
     }
     if (is_leaf_) { // Insert here
       for (int i = num_keys_ - 1; i >= cur_key_pos; i--) {
         keys_[i + 1] = keys_[i];
       }
-      keys_[cur_key_pos] = key;
+      keys_[cur_key_pos] = new T{key};
       num_keys_++;
       return true;
     }
@@ -49,8 +49,8 @@ class BTreeNode final {
       return flag;
     }
 
-    BTreeNode<T, M> *right_child;
-    T mid_key;
+    BTreeNodeWithPtr<T, M> *right_child;
+    T *mid_key;
     children_[cur_key_pos]->Split(right_child, mid_key);
 
     for (int i = num_keys_ - 1; i >= cur_key_pos; i--) {
@@ -66,10 +66,10 @@ class BTreeNode final {
 
   bool Find(const T &key) {
     int cur_key_pos;
-    for (cur_key_pos = 0; cur_key_pos < num_keys_ && keys_[cur_key_pos] < key;) {
+    for (cur_key_pos = 0; cur_key_pos < num_keys_ && *keys_[cur_key_pos] < key;) {
       cur_key_pos += 1;
     }
-    if (cur_key_pos < num_keys_ && !(key < keys_[cur_key_pos]) && !(keys_[cur_key_pos] < key)) { // Equal
+    if (cur_key_pos < num_keys_ && !(key < *keys_[cur_key_pos]) && !(*keys_[cur_key_pos] < key)) { // Equal
       return true;
     }
 
@@ -84,28 +84,29 @@ class BTreeNode final {
     // 可能没必要吧，可能会更慢？
 
     int cur_key_pos;
-    for (cur_key_pos = 0; cur_key_pos < num_keys_ && keys_[cur_key_pos] < key;) {
+    for (cur_key_pos = 0; cur_key_pos < num_keys_ && *keys_[cur_key_pos] < key;) {
       cur_key_pos += 1;
     }
 
     bool flag = false; // 是否删除成功
 
-    if (cur_key_pos < num_keys_ && !(key < keys_[cur_key_pos]) && !(keys_[cur_key_pos] < key)) { // Equal
+    if (cur_key_pos < num_keys_ && !(key < *keys_[cur_key_pos]) && !(*keys_[cur_key_pos] < key)) { // Equal
       if (this->is_leaf_) {
         // 删除
+        delete keys_[cur_key_pos];
         for (int i = cur_key_pos; i < num_keys_ - 1; i++) {
           keys_[i] = keys_[i + 1];
         }
 
         // Debug only
-        keys_[num_keys_ - 1] = T{};
+        keys_[num_keys_ - 1] = 0;
         // end
 
         num_keys_--;
         return true;
       } else {
         // TODO: 随机删前驱或后继
-        BTreeNode<T, M> *cur;
+        BTreeNodeWithPtr<T, M> *cur;
         for (cur = this->children_[cur_key_pos + 1]; !cur->is_leaf_; cur = cur->children_[0]) { ;
         }
         std::swap(keys_[cur_key_pos], cur->keys_[0]);
@@ -151,7 +152,7 @@ class BTreeNode final {
       left = (cur_key_pos > 0);
       right = (cur_key_pos < num_keys_);
 
-      BTreeNode<T, M> *merge_left, *merge_right;
+      BTreeNodeWithPtr<T, M> *merge_left, *merge_right;
       int mid_pos;
 
       if (left && (!right || Rand01())) {
@@ -180,7 +181,7 @@ class BTreeNode final {
         children_[i + 1] = children_[i + 2];
       }
       // Debug begin
-      keys_[num_keys_ - 1] = T{};
+      keys_[num_keys_ - 1] = nullptr;
       children_[num_keys_] = nullptr;
       // end
       num_keys_--;
@@ -197,11 +198,11 @@ class BTreeNode final {
    * @param right_node The right node is stored in right_node.
    * @param mid_key The key in the middle.
    */
-  void Split(BTreeNode<T, M> *&right_node, T &mid_key) {
+  void Split(BTreeNodeWithPtr<T, M> *&right_node, T *&mid_key) {
     int mid_pos = M / 2; // TODO: 随机选择左边或右边的中位数
     mid_key = keys_[mid_pos];
 
-    right_node = new BTreeNode;
+    right_node = new BTreeNodeWithPtr;
     right_node->num_keys_ = num_keys_ - mid_pos - 1;
     right_node->is_leaf_ = is_leaf_;
     for (int i = 0; i < right_node->num_keys_; i++) {
@@ -212,7 +213,7 @@ class BTreeNode final {
 
     // For debug, not necessary
     for (int i = mid_pos; i < num_keys_; i++) {
-      keys_[i] = T{};
+      keys_[i] = nullptr;
       children_[i + 1] = nullptr;
     }
     // end
@@ -223,18 +224,18 @@ class BTreeNode final {
    * 向右旋转
    */
   void RotateRight(int cur_key_pos) {
-    BTreeNode<T, M> *left_child = children_[cur_key_pos];
-    BTreeNode<T, M> *right_child = children_[cur_key_pos + 1];
+    BTreeNodeWithPtr<T, M> *left_child = children_[cur_key_pos];
+    BTreeNodeWithPtr<T, M> *right_child = children_[cur_key_pos + 1];
 
-    T key_temp_left = left_child->keys_[left_child->num_keys_ - 1];
-    BTreeNode<T, M> *node_temp_left = left_child->children_[left_child->num_keys_];
+    T *key_temp_left = left_child->keys_[left_child->num_keys_ - 1];
+    BTreeNodeWithPtr<T, M> *node_temp_left = left_child->children_[left_child->num_keys_];
     // Debug only
-    left_child->keys_[left_child->num_keys_ - 1] = T{};
+    left_child->keys_[left_child->num_keys_ - 1] = nullptr;
     left_child->children_[left_child->num_keys_] = nullptr;
     // end
     left_child->num_keys_--;
 
-    T key_temp_mid = keys_[cur_key_pos];
+    T *key_temp_mid = keys_[cur_key_pos];
     keys_[cur_key_pos] = key_temp_left;
 
     for (int i = right_child->num_keys_ - 1; i >= 0; i--) {
@@ -251,23 +252,23 @@ class BTreeNode final {
    * 向左旋转
    */
   void RotateLeft(int cur_key_pos) {
-    BTreeNode<T, M> *left_child = children_[cur_key_pos];
-    BTreeNode<T, M> *right_child = children_[cur_key_pos + 1];
+    BTreeNodeWithPtr<T, M> *left_child = children_[cur_key_pos];
+    BTreeNodeWithPtr<T, M> *right_child = children_[cur_key_pos + 1];
 
-    T key_temp_right = right_child->keys_[0];
-    BTreeNode<T, M> *node_temp_right = right_child->children_[0];
+    T *key_temp_right = right_child->keys_[0];
+    BTreeNodeWithPtr<T, M> *node_temp_right = right_child->children_[0];
     right_child->children_[0] = right_child->children_[1];
     for (int i = 0; i < right_child->num_keys_ - 1; i++) {
       right_child->keys_[i] = right_child->keys_[i + 1];
       right_child->children_[i + 1] = right_child->children_[i + 2];
     }
     // Debug only
-    right_child->keys_[right_child->num_keys_ - 1] = T{};
+    right_child->keys_[right_child->num_keys_ - 1] = nullptr;
     right_child->children_[right_child->num_keys_] = nullptr;
     // end
     right_child->num_keys_--;
 
-    T key_temp_mid = keys_[cur_key_pos];
+    T *key_temp_mid = keys_[cur_key_pos];
     keys_[cur_key_pos] = key_temp_right;
 
     left_child->keys_[left_child->num_keys_] = key_temp_mid;
@@ -284,17 +285,17 @@ class BTreeNode final {
   }
   static unsigned int seed_;
 
-  T keys_[M + 1]; // 多一位用来处理溢出的情况
-  BTreeNode<T, M> *children_[M + 2];
+  T *keys_[M + 1]; // 多一位用来处理溢出的情况
+  BTreeNodeWithPtr<T, M> *children_[M + 2];
   int num_keys_;
   bool is_leaf_;
 
   friend class BTree<T, M>;
 };
 template<typename T, int M>
-unsigned int BTreeNode<T, M>::seed_ = 0;
+unsigned int BTreeNodeWithPtr<T, M>::seed_ = 0;
 template<typename T, int M>
-const int BTreeNode<T, M>::kNumKeysMin = (M + 1) / 2 - 1;
+const int BTreeNodeWithPtr<T, M>::kNumKeysMin = (M + 1) / 2 - 1;
 
 /**
  * An implementation of B-tree.
@@ -305,7 +306,7 @@ template<typename T, int M> // TODO: specify the size
 class BTree : BinarySearchTree<T> {
  public:
   BTree() {
-    root_ = new BTreeNode<T, M>;
+    root_ = new BTreeNodeWithPtr<T, M>;
     root_->is_leaf_ = true;
   }
 
@@ -316,11 +317,11 @@ class BTree : BinarySearchTree<T> {
       return flag;
     }
 
-    BTreeNode<T, M> *right_child;
-    T mid_key;
+    BTreeNodeWithPtr<T, M> *right_child;
+    T *mid_key;
     root_->Split(right_child, mid_key);
 
-    auto *new_root = new BTreeNode<T, M>;
+    auto *new_root = new BTreeNodeWithPtr<T, M>;
     new_root->keys_[0] = mid_key;
     new_root->children_[0] = root_;
     new_root->children_[1] = right_child;
@@ -337,7 +338,7 @@ class BTree : BinarySearchTree<T> {
   virtual bool Erase(const T &key) {
     bool flag = root_->Erase(key);
     if (!root_->is_leaf_ && root_->num_keys_ == 0) {
-      BTreeNode<T, M> *new_root = root_->children_[0];
+      BTreeNodeWithPtr<T, M> *new_root = root_->children_[0];
       delete root_;
       root_ = new_root;
     }
@@ -345,7 +346,7 @@ class BTree : BinarySearchTree<T> {
   }
 
  private:
-  BTreeNode<T, M> *root_;
+  BTreeNodeWithPtr<T, M> *root_;
 };
 
 #endif //BST__B_TREE_H_

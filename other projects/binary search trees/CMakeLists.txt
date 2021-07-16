@@ -3,4 +3,4 @@ project(binary_search_trees)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(binary_search_trees main.cpp binary_search_tree.h b_tree.h)
+add_executable(binary_search_trees main.cpp binary_search_tree.h b_tree_with_ptr.h b_tree.h)
