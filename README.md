@@ -1,7 +1,18 @@
 # Data-Structures-in-the-Real-World
 course 'Data Structures in the Real World' in freshman year, summer semester
 
+## PA1
 
+### Part2
+
+- [x] `bulk load`
+- [x] `count prefix`
+- [x] 读入优化
+
+- [ ] 基数排序
+- [ ] SIMD
+
+## Other projects
 
 ### B Tree vs. std::set
 
