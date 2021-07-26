@@ -33,6 +33,7 @@
 
 
 *.in
+*.ans
 cmake-build-debug
 .idea
 cmake.check_cache
