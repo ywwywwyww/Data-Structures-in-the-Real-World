@@ -59,8 +59,11 @@ struct flusher {
 }
 
 int main() {
-//  freopen("a.in", "r", stdin);
-//  freopen("a.ans", "w", stdout);
+	printf("press any key to continue...");
+	getchar();
+
+  freopen("a.in", "r", stdin);
+  freopen("a.ans", "w", stdout);
 
   tlx::btree_set<int> set;
 
@@ -74,6 +77,8 @@ int main() {
     io::get(value);
     set.insert(key);
   }
+
+  return 0;
 
   int lvalue, rvalue;
   for (int i = 0; i < m; i++) {
