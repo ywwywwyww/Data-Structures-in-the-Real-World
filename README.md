@@ -5,35 +5,11 @@ course 'Data Structures in the Real World' in freshman year, summer semester
 
 ### Part2
 
-- [x] `bulk load`
-- [x] `count prefix`
-- [x] 读入优化
-
-- [x] 基数排序
-- [ ] SIMD
+SIMD 就不加了好了？
 
 
 
-读入 `0.4s`
-
-排序 `0.16s`
-
-
-
-基数排序切成2&3&4段的速度差不多
-
-快排排 `10m` 个数 需要约 `0.7s`.
-
-基数排序排 `10m` 个数需要约 `0.2s`.
-
-
-
-运行时间（`user time`）（这里的结果不准）：
-
-- 无读入优化：`2.400s`.
-
-- 仅读入优化：`0.957s`.
-- 读入优化 + 基数排序 `0.635s`
+测一下加 size 的时候的 cache miss 和加了 size 之后的吧.
 
 
 
