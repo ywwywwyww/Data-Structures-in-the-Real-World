@@ -11,6 +11,99 @@ SIMD 就不加了好了？
 
 测一下加 size 的时候的 cache miss 和加了 size 之后的吧.
 
+修改之前的
+
+```shell
+2020011000@w3:~$ perf stat -e task-clock,cycles,instructions,cache-references,c
+ache-misses,L1-dcache-loads,L1-dcache-load-misses,L1-icache-loads,L1-icache-loa
+d-misses,branches,branch-misses -p 124494
+
+ Performance counter stats for process id '124494':
+
+          3,316.28 msec task-clock                #    0.553 CPUs utilized
+
+    13,725,665,009      cycles                    #    4.139 GHz
+     8,738,541,318      instructions              #    0.64  insn per cycle
+       330,174,644      cache-references          #   99.562 M/sec
+       111,379,075      cache-misses              #   33.733 % of all cache refs
+     4,446,684,514      L1-dcache-loads           # 1340.866 M/sec
+       154,839,024      L1-dcache-load-misses     #    3.48% of all L1-dcache hits
+     3,044,254,234      L1-icache-loads           #  917.973 M/sec
+         5,444,384      L1-icache-load-misses     #    0.18% of all L1-icache hits
+     1,739,065,412      branches                  #  524.403 M/sec
+       146,303,418      branch-misses             #    8.41% of all branches
+
+       6.000631735 seconds time elapsed
+
+```
+
+
+
+修改之后的
+
+```shell
+2020011000@w3:~$ perf stat -e task-clock,cycles,instructions,cache-references,c
+ache-misses,L1-dcache-loads,L1-dcache-load-misses,L1-icache-loads,L1-icache-loa
+d-misses,branches,branch-misses -p 124805
+
+ Performance counter stats for process id '124805':
+
+          3,500.11 msec task-clock                #    0.583 CPUs utilized
+
+    14,377,538,825      cycles                    #    4.108 GHz
+     9,096,944,037      instructions              #    0.63  insn per cycle
+       460,572,684      cache-references          #  131.588 M/sec
+       145,881,047      cache-misses              #   31.674 % of all cache refs
+     4,578,527,075      L1-dcache-loads           # 1308.109 M/sec
+       216,118,771      L1-dcache-load-misses     #    4.72% of all L1-dcache hits
+     3,928,179,736      L1-icache-loads           # 1122.301 M/sec
+         6,586,966      L1-icache-load-misses     #    0.17% of all L1-icache hits
+     1,816,624,066      branches                  #  519.019 M/sec
+       146,100,117      branch-misses             #    8.04% of all branches
+
+       6.000682789 seconds time elapsed
+
+```
+
+
+
+L1-dcache-load-misses 多了一些...
+
+看来看去好像没啥大问题？可能只是爆缓存了？
+
+
+
+接着又把 node size 调小了一点...
+
+```shell
+2020011000@w3:~$ perf stat -e task-clock,cycles,instructions,cache-references,c
+ache-misses,L1-dcache-loads,L1-dcache-load-misses,L1-icache-loads,L1-icache-loa
+d-misses,branches,branch-misses -p 125988
+
+ Performance counter stats for process id '125988':
+
+          3,024.13 msec task-clock                #    0.756 CPUs 
+    12,439,433,271      cycles                    #    4.113 GHz
+     8,734,128,415      instructions              #    0.70  insn per cycle
+       537,857,981      cache-references          #  177.855 M/sec
+       164,372,756      cache-misses              #   30.561 % of all cache refs
+     4,869,156,535      L1-dcache-loads           # 1610.102 M/sec
+       248,913,975      L1-dcache-load-misses     #    5.11% of all L1-dcache hits
+     2,631,303,106      L1-icache-loads           #  870.103 M/sec
+         7,280,995      L1-icache-load-misses     #    0.28% of all L1-icache hits
+     1,842,414,374      branches                  #  609.238 M/sec
+       114,364,074      branch-misses             #    6.21% of all branches
+
+       4.000395703 seconds time elapsed
+
+```
+
+反正是变快了。。。
+
+
+
+剩下的等到发数据了再微调吧...
+
 
 
 ## Other projects
