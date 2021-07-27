@@ -9,8 +9,14 @@ course 'Data Structures in the Real World' in freshman year, summer semester
 - [x] `count prefix`
 - [x] 读入优化
 
-- [ ] 基数排序
+- [x] 基数排序
 - [ ] SIMD
+
+
+
+读入 `0.4s`
+
+排序 `0.16s`
 
 
 
@@ -22,11 +28,12 @@ course 'Data Structures in the Real World' in freshman year, summer semester
 
 
 
-运行时间（`user time`）：
+运行时间（`user time`）（这里的结果不准）：
 
 - 无读入优化：`2.400s`.
 
 - 仅读入优化：`0.957s`.
+- 读入优化 + 基数排序 `0.635s`
 
 
 
