@@ -59,8 +59,39 @@ struct flusher {
 }
 
 void Sort(int *a, int n) {
-  // TODO: 改用基数排序
-  std::sort(a, a + n);
+  static unsigned int buf0[1 << 8], buf1[1 << 8], buf2[1 << 8], buf3[1 << 8];
+  unsigned *b = new unsigned[n];
+  unsigned *c = new unsigned[n];
+
+  for (int i = 0; i < n; i++) {
+    c[i] = a[i] ^ (1 << 31);
+    buf0[c[i] % (1 << 8)]++;
+    buf1[(c[i] >> 8) % (1 << 8)]++;
+    buf2[(c[i] >> 16) % (1 << 8)]++;
+    buf3[c[i] >> 24]++;
+  }
+
+  for (int i = 1; i < 1 << 8; i++) {
+    buf0[i] += buf0[i - 1];
+    buf1[i] += buf1[i - 1];
+    buf2[i] += buf2[i - 1];
+    buf3[i] += buf3[i - 1];
+  }
+
+  for (int i = n - 1; i >= 0; i--) {
+    b[--buf0[c[i] % (1 << 8)]] = c[i];
+  }
+  for (int i = n - 1; i >= 0; i--) {
+    c[--buf1[(b[i] >> 8) % (1 << 8)]] = b[i];
+  }
+  for (int i = n - 1; i >= 0; i--) {
+    b[--buf2[(c[i] >> 16) % (1 << 8)]] = c[i];
+  }
+  for (int i = n - 1; i >= 0; i--) {
+    a[--buf3[b[i] >> 24]] = b[i] ^ (1 << 31);
+  }
+  delete[] b;
+  delete[] c;
 }
 
 int main() {

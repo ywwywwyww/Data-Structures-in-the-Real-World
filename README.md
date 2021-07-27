@@ -12,6 +12,24 @@ course 'Data Structures in the Real World' in freshman year, summer semester
 - [ ] 基数排序
 - [ ] SIMD
 
+
+
+基数排序切成2&3&4段的速度差不多
+
+快排排 `10m` 个数 需要约 `0.7s`.
+
+基数排序排 `10m` 个数需要约 `0.2s`.
+
+
+
+运行时间（`user time`）：
+
+- 无读入优化：`2.400s`.
+
+- 仅读入优化：`0.957s`.
+
+
+
 ## Other projects
 
 ### B Tree vs. std::set
