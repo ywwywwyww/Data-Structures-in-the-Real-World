@@ -1,0 +1,29 @@
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  Ts/call  Ts/call  name    
+100.07      3.49     3.49                             tlx::BTree<int, int, tlx::btree_set<int, std::less<int>, tlx::btree_default_traits<int, int>, std::allocator<int> >::key_of_value, std::less<int>, tlx::btree_default_traits<int, int>, false, std::allocator<int> >::insert_descend(tlx::BTree<int, int, tlx::btree_set<int, std::less<int>, tlx::btree_default_traits<int, int>, std::allocator<int> >::key_of_value, std::less<int>, tlx::btree_default_traits<int, int>, false, std::allocator<int> >::node*, int const&, int const&, int*, tlx::BTree<int, int, tlx::btree_set<int, std::less<int>, tlx::btree_default_traits<int, int>, std::allocator<int> >::key_of_value, std::less<int>, tlx::btree_default_traits<int, int>, false, std::allocator<int> >::node**, unsigned int&)
+  0.00      3.49     0.00        2     0.00     0.00  io::enter()
+  0.00      3.49     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN2io4ibufE
+
+			Call graph
+
+
+granularity: each sample hit covers 2 byte(s) for 0.29% of 3.49 seconds
+
+index % time    self  children    called     name
+                             4616315             tlx::BTree<int, int, tlx::btree_set<int, std::less<int>, tlx::btree_default_traits<int, int>, std::allocator<int> >::key_of_value, std::less<int>, tlx::btree_default_traits<int, int>, false, std::allocator<int> >::insert_descend(tlx::BTree<int, int, tlx::btree_set<int, std::less<int>, tlx::btree_default_traits<int, int>, std::allocator<int> >::key_of_value, std::less<int>, tlx::btree_default_traits<int, int>, false, std::allocator<int> >::node*, int const&, int const&, int*, tlx::BTree<int, int, tlx::btree_set<int, std::less<int>, tlx::btree_default_traits<int, int>, std::allocator<int> >::key_of_value, std::less<int>, tlx::btree_default_traits<int, int>, false, std::allocator<int> >::node**, unsigned int&) [1]
+[1]    100.0    3.49    0.00       0+4616315 tlx::BTree<int, int, tlx::btree_set<int, std::less<int>, tlx::btree_default_traits<int, int>, std::allocator<int> >::key_of_value, std::less<int>, tlx::btree_default_traits<int, int>, false, std::allocator<int> >::insert_descend(tlx::BTree<int, int, tlx::btree_set<int, std::less<int>, tlx::btree_default_traits<int, int>, std::allocator<int> >::key_of_value, std::less<int>, tlx::btree_default_traits<int, int>, false, std::allocator<int> >::node*, int const&, int const&, int*, tlx::BTree<int, int, tlx::btree_set<int, std::less<int>, tlx::btree_default_traits<int, int>, std::allocator<int> >::key_of_value, std::less<int>, tlx::btree_default_traits<int, int>, false, std::allocator<int> >::node**, unsigned int&) [1]
+                             4616315             tlx::BTree<int, int, tlx::btree_set<int, std::less<int>, tlx::btree_default_traits<int, int>, std::allocator<int> >::key_of_value, std::less<int>, tlx::btree_default_traits<int, int>, false, std::allocator<int> >::insert_descend(tlx::BTree<int, int, tlx::btree_set<int, std::less<int>, tlx::btree_default_traits<int, int>, std::allocator<int> >::key_of_value, std::less<int>, tlx::btree_default_traits<int, int>, false, std::allocator<int> >::node*, int const&, int const&, int*, tlx::BTree<int, int, tlx::btree_set<int, std::less<int>, tlx::btree_default_traits<int, int>, std::allocator<int> >::key_of_value, std::less<int>, tlx::btree_default_traits<int, int>, false, std::allocator<int> >::node**, unsigned int&) [1]
+-----------------------------------------------
+                0.00    0.00       2/2           tlx::BTree<int, int, tlx::btree_set<int, std::less<int>, tlx::btree_default_traits<int, int>, std::allocator<int> >::key_of_value, std::less<int>, tlx::btree_default_traits<int, int>, false, std::allocator<int> >::clear() [19]
+[9]      0.0    0.00    0.00       2         io::enter() [9]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [25]
+[10]     0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN2io4ibufE [10]
+-----------------------------------------------
+
+Index by function name
+
+  [10] _GLOBAL__sub_I__ZN2io4ibufE [9] io::enter()         [1] tlx::BTree<int, int, tlx::btree_set<int, std::less<int>, tlx::btree_default_traits<int, int>, std::allocator<int> >::key_of_value, std::less<int>, tlx::btree_default_traits<int, int>, false, std::allocator<int> >::insert_descend(tlx::BTree<int, int, tlx::btree_set<int, std::less<int>, tlx::btree_default_traits<int, int>, std::allocator<int> >::key_of_value, std::less<int>, tlx::btree_default_traits<int, int>, false, std::allocator<int> >::node*, int const&, int const&, int*, tlx::BTree<int, int, tlx::btree_set<int, std::less<int>, tlx::btree_default_traits<int, int>, std::allocator<int> >::key_of_value, std::less<int>, tlx::btree_default_traits<int, int>, false, std::allocator<int> >::node**, unsigned int&)
