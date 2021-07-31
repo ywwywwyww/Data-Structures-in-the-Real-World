@@ -1407,37 +1407,15 @@ class BTree {
 
   //! Attempt to insert a key/data pair into the B+ tree. If the tree does not
   //! allow duplicate keys, then the insert may fail if it is already present.
-  std::pair<iterator, bool> insert(const value_type &x) {
+  bool insert(const value_type &x) {
     return insert_start(key_of_value::get(x), x);
   }
 
-  //! Attempt to insert a key/data pair into the B+ tree. The iterator hint is
-  //! currently ignored by the B+ tree insertion routine.
-  iterator insert(iterator /* hint */, const value_type &x) {
-    return insert_start(key_of_value::get(x), x).first;
-  }
-
-  //! Attempt to insert the range [first,last) of value_type pairs into the B+
-  //! tree. Each key/data pair is inserted individually; to bulk load the
-  //! tree, use a constructor with range.
-  template<typename InputIterator>
-  void insert(InputIterator first, InputIterator last) {
-    InputIterator iter = first;
-    while (iter != last) {
-      insert(*iter);
-      ++iter;
-    }
-  }
-
-  //! \}
 
  private:
-  //! \name Private Insertion Functions
-  //! \{
-
   //! Start the insertion descent at the current root and handle root splits.
   //! Returns true if the item was inserted
-  std::pair<iterator, bool> insert_start(const key_type &key,
+  bool insert_start(const key_type &key,
                                          const value_type &value) {
 
     node *newchild = nullptr;
@@ -1448,11 +1426,11 @@ class BTree {
       root_ = head_leaf_ = tail_leaf_ = allocate_leaf();
     }
 
-    std::pair<iterator, bool> r =
+    bool r =
         insert_descend(root_, key, value, &newkey, &newchild, new_size);
 
     // increment size if the item was inserted
-    if (r.second)
+    if (r)
       ++stats_.size;
 
     if (newchild) {
@@ -1489,7 +1467,7 @@ class BTree {
    * slot. If the node overflows, then it must be split and the new split node
    * inserted into the parent. Unroll / this splitting up to the root.
    */
-  std::pair<iterator, bool> insert_descend(node *n, const key_type &key,
+  bool insert_descend(node *n, const key_type &key,
                                            const value_type &value,
                                            key_type *splitkey,
                                            node **splitnode, unsigned &split_size) {
@@ -1507,9 +1485,9 @@ class BTree {
 
       TLX_BTREE_PRINT("BTree::insert_descend into " << inner->childid[slot]);
 
-      std::pair<iterator, bool> r =
+      bool r =
           insert_descend(inner->childid[slot], key, value, &newkey, &newchild, new_size);
-      if (r.second == true) {
+      if (r == true) {
         inner->child_size[slot]++;
         inner->size++;
       }
@@ -1613,7 +1591,7 @@ class BTree {
 
       if (!allow_duplicates && slot < leaf->slotuse &&
           key_equal(key, leaf->key(slot))) {
-        return std::pair<iterator, bool>(iterator(leaf, slot), false);
+        return false;
       }
 
       if (leaf->is_full()) {
@@ -1645,7 +1623,7 @@ class BTree {
         *splitkey = key;
       }
 
-      return std::pair<iterator, bool>(iterator(leaf, slot), true);
+      return true;
     }
   }
 

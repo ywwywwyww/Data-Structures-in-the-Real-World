@@ -400,34 +400,9 @@ public:
 
   //! Attempt to insert a key into the B+ tree. The insert will fail if it is
   //! already present.
-  std::pair<iterator, bool> insert(const key_type &x) {
+  bool insert(const key_type &x) {
     return tree_.insert(x);
   }
-
-  //! Attempt to insert a key into the B+ tree. The iterator hint is currently
-  //! ignored by the B+ tree insertion routine.
-  iterator insert(iterator hint, const key_type &x) {
-    return tree_.insert(hint, x);
-  }
-
-  //! Attempt to insert the range [first,last) of iterators dereferencing to
-  //! key_type into the B+ tree. Each key/data pair is inserted individually.
-  template <typename InputIterator>
-  void insert(InputIterator first, InputIterator last) {
-    InputIterator iter = first;
-    while (iter != last) {
-      insert(*iter);
-      ++iter;
-    }
-  }
-
-  //! Bulk load a sorted range [first,last). Loads items into leaves and
-  //! constructs a B-tree above them. The tree must be empty when calling this
-  //! function.
-  template <typename Iterator> void bulk_load(Iterator first, Iterator last) {
-    return tree_.bulk_load(first, last);
-  }
-
   //! \}
 
 public:

@@ -5,9 +5,37 @@ course 'Data Structures in the Real World' in freshman year, summer semester
 
 ### Part2
 
-SIMD 还加不加了？
+- [ ] SIMD 
+
+- [ ] 调整块大小
+- [ ] 调整编译选项
 
 case1 的测试结果：
+
+```shell
+2020011000@w3:~$ perf stat -e task-clock,cycles,instructions,cache-references,c
+ache-misses,L1-dcache-loads,L1-dcache-load-misses,L1-icache-loads,L1-icache-loa
+d-misses,branches,branch-misses -p 96751
+
+ Performance counter stats for process id '96751':
+
+          8,172.32 msec task-clock                #    0.817 CPUs utilized
+    33,195,436,584      cycles                    #    4.062 GHz
+    19,059,250,564      instructions              #    0.57  insn per cycle
+     1,105,811,470      cache-references          #  135.312 M/sec
+       362,929,433      cache-misses              #   32.820 % of all cache refs
+     9,665,183,751      L1-dcache-loads           # 1182.673 M/sec
+       497,489,637      L1-dcache-load-misses     #    5.15% of all L1-dcache hits
+     8,097,317,073      L1-icache-loads           #  990.823 M/sec
+        19,058,979      L1-icache-load-misses     #    0.24% of all L1-icache hits
+     3,921,389,854      branches                  #  479.838 M/sec
+       316,166,733      branch-misses             #    8.06% of all branches
+      10.000844821 seconds time elapsed
+
+2020011000@w3:~$
+```
+
+
 
 
 
