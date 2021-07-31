@@ -12,6 +12,9 @@ int getc() {
 }
 int f;
 char c;
+void getop(char &ch) {
+  for(ch = getc(); ch != 'i' && ch != 'r'; ch = getc());
+}
 template<class T>
 void get(T &x) {
   f = 1;
@@ -59,36 +62,34 @@ struct flusher {
 }
 
 int main() {
-	printf("press any key to continue...");
-	getchar();
+//  printf("press any key to continue...");
+//  getchar();
 
-  freopen("a.in", "r", stdin);
-  freopen("a.ans", "w", stdout);
+//  freopen("a1.in", "r", stdin);
+//  freopen("a1.ans", "w", stdout);
 
   tlx::btree_set<int> set;
 
-  int n, m;
+  int n;
   io::get(n);
-  io::get(m);
 
-  int key, value;
+  char op;
+  int x, y;
   for (int i = 0; i < n; i++) {
-    io::get(key);
-    io::get(value);
-    set.insert(key);
-  }
-
-  return 0;
-
-  int lvalue, rvalue;
-  for (int i = 0; i < m; i++) {
-    io::get(lvalue);
-    io::get(rvalue);
-    int ans = set.count_prefix(rvalue - 1);
-    if (lvalue - 1 < lvalue) {
-      ans -= set.count_prefix(lvalue - 1);
+    io::getop(op);
+    io::get(x);
+    io::get(y);
+    if (op == 'i') {
+      set.insert(x);
+    } else {
+      int ans = set.count_prefix(y - 1);
+      if (x - 1 < x) {
+        ans -= set.count_prefix(x - 1);
+      }
+      io::put(ans);
+      io::enter();
     }
-    printf("%d\n", ans);
   }
+
   return 0;
 }
