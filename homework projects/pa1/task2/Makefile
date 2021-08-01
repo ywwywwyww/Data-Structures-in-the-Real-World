@@ -3,7 +3,7 @@ HEADERS=$(wildcard *.h)
 sOBJECTS1=$(sSOURCES:%.cpp=%.o)
 sOBJECTS2=$(sOBJECTS1:%.cxx=%.o)
 sOBJECTS=$(sOBJECTS2:%.cc=%.o)
-TARGET=$(shell pwd |sed 's/^\(.*\)[/]//' )
+TARGET=main
 COMPILEOPTION=-std=c++17 -O3 -march=native -frename-registers -funroll-all-loops
 
 
