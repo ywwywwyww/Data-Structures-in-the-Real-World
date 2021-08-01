@@ -37,6 +37,45 @@ d-misses,branches,branch-misses -p 96751
 
 
 
+## PA2
+
+- Cache line size: 64
+- L2 cache size: 512K
+
+
+
+试试无锁的 long long 修改 和有锁的 SIMD 修改哪个比较快
+
+
+
+lock cmpxchg16b
+
+
+
+32 threads:
+
+- 对不同元素使用 atomic add: `21s`
+- 对同一个元素使用 atomic add: `46s`
+- 对不同元素加锁: `20s`
+- 对同一个元素加锁：我猜会很慢
+
+
+
+
+
+每个线程 1e8 次 inc 操作，计数器不同，但不同计数器的内存地址是相邻的
+
+串行：<< 1s
+
+| NumThreads | atomic add (in the same block) | shared_mutex (in the same block) | atomic add | shared_mutex |
+| ---------- | ------------------------------ | -------------------------------- | ---------- | ------------ |
+| 1          | 0.56s                          | 2.26s                            | 0.57s      |              |
+| 2          | 1.7s                           | ~25s                             |            |              |
+| 4          | 3.4s                           | ~55s                             |            |              |
+| 8          | 8s                             | ~90s                             |            |              |
+| 16         | 21s                            | ~130s                            | 0.63s      |              |
+| 32         | 32s                            | ~140s                            | 0.69s      |              |
+
 
 
 ## Other projects
