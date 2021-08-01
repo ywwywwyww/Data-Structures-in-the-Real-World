@@ -27,6 +27,9 @@
 
 namespace tlx {
 
+#define likely(x) __builtin_expect(!!(x), 1)
+#define unlikely(x) __builtin_expect(!!(x), 0)
+
 //! \addtogroup tlx_container
 //! \{
 //! \defgroup tlx_container_btree B+ Trees
@@ -1299,6 +1302,8 @@ class BTree {
                       key_type *splitkey,
                       node **splitnode, unsigned &split_size) {
 
+    __builtin_prefetch(n);
+
     bool is_in_split_node = false;
 
     if (!n->is_leafnode()) {
@@ -1314,7 +1319,7 @@ class BTree {
 
       bool r =
           insert_descend(inner->child_info[slot].first, key, value, &newkey, &newchild, new_size);
-      if (r == true) {
+      if (likely(r == true)) {
         inner->child_info[slot].second++;
         inner->size++;
       }
