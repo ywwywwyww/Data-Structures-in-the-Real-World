@@ -1302,8 +1302,6 @@ class BTree {
                       key_type *splitkey,
                       node **splitnode, unsigned &split_size) {
 
-    __builtin_prefetch(n);
-
     bool is_in_split_node = false;
 
     if (!n->is_leafnode()) {
@@ -1325,37 +1323,19 @@ class BTree {
       }
 
       if (newchild) {
-        TLX_BTREE_PRINT("BTree::insert_descend newchild"
-                            << " with key " << newkey << " node " << newchild
-                            << " at slot " << slot);
+        __builtin_prefetch(n);
+
         inner->child_info[slot].second -= new_size;
         inner->size -= new_size;
 
-        if (inner->is_full()) {
+        if (unlikely(inner->is_full())) {
           split_inner_node(inner, splitkey, splitnode, split_size, slot);
 
-          TLX_BTREE_PRINT("BTree::insert_descend done split_inner:"
-                              << " putslot: " << slot << " putkey: " << newkey
-                              << " upkey: " << *splitkey);
-
-#ifdef TLX_BTREE_DEBUG
-          if (debug) {
-            print_node(std::cout, inner);
-            print_node(std::cout, *splitnode);
-          }
-#endif
-
-          // check if insert slot is in the split sibling node
-          TLX_BTREE_PRINT("BTree::insert_descend switch: "
-                              << slot << " > " << inner->slotuse + 1);
-
-          if (slot == inner->slotuse + 1 &&
-              inner->slotuse < (*splitnode)->slotuse) {
+          if (unlikely(slot == inner->slotuse + 1 &&
+              inner->slotuse < (*splitnode)->slotuse)) {
             // special case when the insert slot matches the split
             // place between the two nodes, then the insert key
             // becomes the split key.
-
-            TLX_BTREE_ASSERT(inner->slotuse + 1 < inner_slotmax);
 
             InnerNode *split = static_cast<InnerNode *>(*splitnode);
 
@@ -1384,14 +1364,8 @@ class BTree {
             slot -= inner->slotuse + 1;
             inner = static_cast<InnerNode *>(*splitnode);
             is_in_split_node = true;
-            TLX_BTREE_PRINT("BTree::insert_descend switching to "
-                            "splitted node "
-                                << inner << " slot " << slot);
           }
         }
-
-        // move items and put pointer to child node into correct slot
-        TLX_BTREE_ASSERT(slot >= 0 && slot <= inner->slotuse);
 
         std::copy_backward(inner->slotkey + slot,
                            inner->slotkey + inner->slotuse,
@@ -1414,6 +1388,7 @@ class BTree {
       return r;
     } else // n->is_leafnode() == true
     {
+      __builtin_prefetch(n);
       LeafNode *leaf = static_cast<LeafNode *>(n);
 
       unsigned short slot = find_lower(leaf, key);
