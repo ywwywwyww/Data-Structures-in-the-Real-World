@@ -27,8 +27,6 @@
 
 namespace tlx {
 
-#define likely(x) __builtin_expect(!!(x), 1)
-#define unlikely(x) __builtin_expect(!!(x), 0)
 
 //! \addtogroup tlx_container
 //! \{
@@ -1317,22 +1315,21 @@ class BTree {
 
       bool r =
           insert_descend(inner->child_info[slot].first, key, value, &newkey, &newchild, new_size);
-      if (likely(r == true)) {
+      if (r == true) {
         inner->child_info[slot].second++;
         inner->size++;
       }
 
       if (newchild) {
-        __builtin_prefetch(n);
 
         inner->child_info[slot].second -= new_size;
         inner->size -= new_size;
 
-        if (unlikely(inner->is_full())) {
+        if (inner->is_full()) {
           split_inner_node(inner, splitkey, splitnode, split_size, slot);
 
-          if (unlikely(slot == inner->slotuse + 1 &&
-              inner->slotuse < (*splitnode)->slotuse)) {
+          if (slot == inner->slotuse + 1 &&
+              inner->slotuse < (*splitnode)->slotuse) {
             // special case when the insert slot matches the split
             // place between the two nodes, then the insert key
             // becomes the split key.
@@ -1388,7 +1385,6 @@ class BTree {
       return r;
     } else // n->is_leafnode() == true
     {
-      __builtin_prefetch(n);
       LeafNode *leaf = static_cast<LeafNode *>(n);
 
       unsigned short slot = find_lower(leaf, key);
