@@ -10,7 +10,7 @@ course 'Data Structures in the Real World' in freshman year, summer semester
 - [ ] 调整块大小
 - [ ] 调整编译选项
 
-case1 的测试结果：
+case1 的测试结果 (7.31)：
 
 ```shell
 2020011000@w3:~$ perf stat -e task-clock,cycles,instructions,cache-references,c
@@ -34,6 +34,10 @@ d-misses,branches,branch-misses -p 96751
 
 2020011000@w3:~$
 ```
+
+
+
+最终结果 (8.1)：5.1 4.0 4.9 2.0 5.4 1.1 5.4
 
 
 
