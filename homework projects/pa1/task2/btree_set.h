@@ -405,6 +405,13 @@ public:
   }
   //! \}
 
+  //! Bulk load a sorted range [first,last). Loads items into leaves and
+  //! constructs a B-tree above them. The tree must be empty when calling this
+  //! function.
+  template <typename Iterator> void bulk_load(Iterator first, Iterator last) {
+    return tree_.bulk_load(first, last);
+  }
+
 public:
   //! \name Public Erase Functions
   //! \{

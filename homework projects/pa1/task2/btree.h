@@ -248,7 +248,7 @@ class BTree {
 
 //    int child_size[inner_slotmax + 1];
 
-    std::pair<node*, unsigned int> child_info[inner_slotmax + 1];
+    std::pair<node *, unsigned int> child_info[inner_slotmax + 1];
 
     //! Size of this subtree
     unsigned int size;
@@ -400,7 +400,6 @@ class BTree {
 
     //! Key of the current slot.
     const key_type &key() const { return curr_leaf->key(curr_slot); }
-
 
     //! Equality of iterators.
     bool operator==(const iterator &x) const {
@@ -681,7 +680,6 @@ class BTree {
       return curr_leaf->key(curr_slot - 1);
     }
 
-
     //! Equality of iterators.
     bool operator==(const const_reverse_iterator &x) const {
       return (x.curr_leaf == curr_leaf) && (x.curr_slot == curr_slot);
@@ -742,12 +740,6 @@ class BTree {
   //! Pointer to the B+ tree's root node, either leaf or inner node.
   node *root_;
 
-  //! Pointer to first leaf in the double linked leaf chain.
-  LeafNode *head_leaf_;
-
-  //! Pointer to last leaf in the double linked leaf chain.
-  LeafNode *tail_leaf_;
-
   //! Other small statistics about the B+ tree.
   tree_stats stats_;
 
@@ -767,14 +759,14 @@ class BTree {
   //! Default constructor initializing an empty B+ tree with the standard key
   //! comparison function.
   explicit BTree(const allocator_type &alloc = allocator_type())
-      : root_(nullptr), head_leaf_(nullptr), tail_leaf_(nullptr),
+      : root_(nullptr),
         allocator_(alloc) {}
 
   //! Constructor initializing an empty B+ tree with a special key
   //! comparison object.
   explicit BTree(const key_compare &kcf,
                  const allocator_type &alloc = allocator_type())
-      : root_(nullptr), head_leaf_(nullptr), tail_leaf_(nullptr),
+      : root_(nullptr),
         key_less_(kcf), allocator_(alloc) {}
 
   //! Constructor initializing a B+ tree with the range [first,last). The
@@ -783,7 +775,7 @@ class BTree {
   template<class InputIterator>
   BTree(InputIterator first, InputIterator last,
         const allocator_type &alloc = allocator_type())
-      : root_(nullptr), head_leaf_(nullptr), tail_leaf_(nullptr),
+      : root_(nullptr),
         allocator_(alloc) {
     insert(first, last);
   }
@@ -794,7 +786,7 @@ class BTree {
   template<class InputIterator>
   BTree(InputIterator first, InputIterator last, const key_compare &kcf,
         const allocator_type &alloc = allocator_type())
-      : root_(nullptr), head_leaf_(nullptr), tail_leaf_(nullptr),
+      : root_(nullptr),
         key_less_(kcf), allocator_(alloc) {
     insert(first, last);
   }
@@ -805,8 +797,6 @@ class BTree {
   //! Fast swapping of two identical B+ tree objects.
   void swap(BTree &from) {
     std::swap(root_, from.root_);
-    std::swap(head_leaf_, from.head_leaf_);
-    std::swap(tail_leaf_, from.tail_leaf_);
     std::swap(stats_, from.stats_);
     std::swap(key_less_, from.key_less_);
     std::swap(allocator_, from.allocator_);
@@ -949,7 +939,6 @@ class BTree {
       free_node(root_);
 
       root_ = nullptr;
-      head_leaf_ = tail_leaf_ = nullptr;
 
       stats_ = tree_stats();
     }
@@ -984,43 +973,27 @@ class BTree {
 
   //! Constructs a read/data-write iterator that points to the first slot in
   //! the first leaf of the B+ tree.
-  iterator begin() { return iterator(head_leaf_, 0); }
 
   //! Constructs a read/data-write iterator that points to the first invalid
   //! slot in the last leaf of the B+ tree.
-  iterator end() {
-    return iterator(tail_leaf_, tail_leaf_ ? tail_leaf_->slotuse : 0);
-  }
 
   //! Constructs a read-only constant iterator that points to the first slot
   //! in the first leaf of the B+ tree.
-  const_iterator begin() const { return const_iterator(head_leaf_, 0); }
 
   //! Constructs a read-only constant iterator that points to the first
   //! invalid slot in the last leaf of the B+ tree.
-  const_iterator end() const {
-    return const_iterator(tail_leaf_, tail_leaf_ ? tail_leaf_->slotuse : 0);
-  }
 
   //! Constructs a read/data-write reverse iterator that points to the first
   //! invalid slot in the last leaf of the B+ tree. Uses STL magic.
-  reverse_iterator rbegin() { return reverse_iterator(end()); }
 
   //! Constructs a read/data-write reverse iterator that points to the first
   //! slot in the first leaf of the B+ tree. Uses STL magic.
-  reverse_iterator rend() { return reverse_iterator(begin()); }
 
   //! Constructs a read-only reverse iterator that points to the first
   //! invalid slot in the last leaf of the B+ tree. Uses STL magic.
-  const_reverse_iterator rbegin() const {
-    return const_reverse_iterator(end());
-  }
 
   //! Constructs a read-only reverse iterator that points to the first slot
   //! in the first leaf of the B+ tree. Uses STL magic.
-  const_reverse_iterator rend() const {
-    return const_reverse_iterator(begin());
-  }
 
   //! \}
 
@@ -1165,47 +1138,6 @@ class BTree {
 
   //! Tries to locate a key in the B+ tree and returns an iterator to the
   //! key/data slot if found. If unsuccessful it returns end().
-  iterator find(const key_type &key) {
-    node *n = root_;
-    if (!n)
-      return end();
-
-    while (!n->is_leafnode()) {
-      const InnerNode *inner = static_cast<const InnerNode *>(n);
-      unsigned short slot = find_lower(inner, key);
-
-      n = inner->child_info[slot].first;
-    }
-
-    LeafNode *leaf = static_cast<LeafNode *>(n);
-
-    unsigned short slot = find_lower(leaf, key);
-    return (slot < leaf->slotuse && key_equal(key, leaf->key(slot)))
-           ? iterator(leaf, slot)
-           : end();
-  }
-
-  //! Tries to locate a key in the B+ tree and returns an constant iterator to
-  //! the key/data slot if found. If unsuccessful it returns end().
-  const_iterator find(const key_type &key) const {
-    const node *n = root_;
-    if (!n)
-      return end();
-
-    while (!n->is_leafnode()) {
-      const InnerNode *inner = static_cast<const InnerNode *>(n);
-      unsigned short slot = find_lower(inner, key);
-
-      n = inner->child_info[slot].first;
-    }
-
-    const LeafNode *leaf = static_cast<const LeafNode *>(n);
-
-    unsigned short slot = find_lower(leaf, key);
-    return (slot < leaf->slotuse && key_equal(key, leaf->key(slot)))
-           ? const_iterator(leaf, slot)
-           : end();
-  }
 
   unsigned int count_prefix(const key_type &key) const {
     const node *n = root_;
@@ -1238,98 +1170,6 @@ class BTree {
     return ans;
   }
 
-  //! Searches the B+ tree and returns an iterator to the first pair equal to
-  //! or greater than key, or end() if all keys are smaller.
-  iterator lower_bound(const key_type &key) {
-    node *n = root_;
-    if (!n)
-      return end();
-
-    while (!n->is_leafnode()) {
-      const InnerNode *inner = static_cast<const InnerNode *>(n);
-      unsigned short slot = find_lower(inner, key);
-
-      n = inner->child_info[slot].first;
-    }
-
-    LeafNode *leaf = static_cast<LeafNode *>(n);
-
-    unsigned short slot = find_lower(leaf, key);
-    return iterator(leaf, slot);
-  }
-
-  //! Searches the B+ tree and returns a constant iterator to the first pair
-  //! equal to or greater than key, or end() if all keys are smaller.
-  const_iterator lower_bound(const key_type &key) const {
-    const node *n = root_;
-    if (!n)
-      return end();
-
-    while (!n->is_leafnode()) {
-      const InnerNode *inner = static_cast<const InnerNode *>(n);
-      unsigned short slot = find_lower(inner, key);
-
-      n = inner->child_info[slot].first;
-    }
-
-    const LeafNode *leaf = static_cast<const LeafNode *>(n);
-
-    unsigned short slot = find_lower(leaf, key);
-    return const_iterator(leaf, slot);
-  }
-
-  //! Searches the B+ tree and returns an iterator to the first pair greater
-  //! than key, or end() if all keys are smaller or equal.
-  iterator upper_bound(const key_type &key) {
-    node *n = root_;
-    if (!n)
-      return end();
-
-    while (!n->is_leafnode()) {
-      const InnerNode *inner = static_cast<const InnerNode *>(n);
-      unsigned short slot = find_upper(inner, key);
-
-      n = inner->child_info[slot].first;
-    }
-
-    LeafNode *leaf = static_cast<LeafNode *>(n);
-
-    unsigned short slot = find_upper(leaf, key);
-    return iterator(leaf, slot);
-  }
-
-  //! Searches the B+ tree and returns a constant iterator to the first pair
-  //! greater than key, or end() if all keys are smaller or equal.
-  const_iterator upper_bound(const key_type &key) const {
-    const node *n = root_;
-    if (!n)
-      return end();
-
-    while (!n->is_leafnode()) {
-      const InnerNode *inner = static_cast<const InnerNode *>(n);
-      unsigned short slot = find_upper(inner, key);
-
-      n = inner->child_info[slot].first;
-    }
-
-    const LeafNode *leaf = static_cast<const LeafNode *>(n);
-
-    unsigned short slot = find_upper(leaf, key);
-    return const_iterator(leaf, slot);
-  }
-
-  //! Searches the B+ tree and returns both lower_bound() and upper_bound().
-  std::pair<iterator, iterator> equal_range(const key_type &key) {
-    return std::pair<iterator, iterator>(lower_bound(key), upper_bound(key));
-  }
-
-  //! Searches the B+ tree and returns both lower_bound() and upper_bound().
-  std::pair<const_iterator, const_iterator>
-  equal_range(const key_type &key) const {
-    return std::pair<const_iterator, const_iterator>(lower_bound(key),
-                                                     upper_bound(key));
-  }
-
   //! \}
 
  public:
@@ -1339,31 +1179,6 @@ class BTree {
   //! Equality relation of B+ trees of the same type. B+ trees of the same
   //! size and equal elements (both key and data) are considered equal. Beware
   //! of the random ordering of duplicate keys.
-  bool operator==(const BTree &other) const {
-    return (size() == other.size()) &&
-        std::equal(begin(), end(), other.begin());
-  }
-
-  //! Inequality relation. Based on operator==.
-  bool operator!=(const BTree &other) const { return !(*this == other); }
-
-  //! Total ordering relation of B+ trees of the same type. It uses
-  //! std::lexicographical_compare() for the actual comparison of elements.
-  bool operator<(const BTree &other) const {
-    return std::lexicographical_compare(begin(), end(), other.begin(),
-                                        other.end());
-  }
-
-  //! Greater relation. Based on operator<.
-  bool operator>(const BTree &other) const { return other < *this; }
-
-  //! Less-equal relation. Based on operator<.
-  bool operator<=(const BTree &other) const { return !(other < *this); }
-
-  //! Greater-equal relation. Based on operator<.
-  bool operator>=(const BTree &other) const { return !(*this < other); }
-
-  //! \}
 
  public:
   //! \name Fast Copy: Assign Operator and Copy Constructors
@@ -1391,7 +1206,7 @@ class BTree {
   //! Copy constructor. The newly initialized B+ tree object will contain a
   //! copy of all key/data pairs.
   BTree(const BTree &other)
-      : root_(nullptr), head_leaf_(nullptr), tail_leaf_(nullptr),
+      : root_(nullptr),
         stats_(other.stats_), key_less_(other.key_comp()),
         allocator_(other.get_allocator()) {
     if (size() > 0) {
@@ -1412,19 +1227,18 @@ class BTree {
     return insert_start(key_of_value::get(x), x);
   }
 
-
  private:
   //! Start the insertion descent at the current root and handle root splits.
   //! Returns true if the item was inserted
   bool insert_start(const key_type &key,
-                                         const value_type &value) {
+                    const value_type &value) {
 
     node *newchild = nullptr;
     key_type newkey = key_type();
     unsigned new_size = 0;
 
     if (root_ == nullptr) {
-      root_ = head_leaf_ = tail_leaf_ = allocate_leaf();
+      root_ = allocate_leaf();
     }
 
     bool r =
@@ -1469,9 +1283,9 @@ class BTree {
    * inserted into the parent. Unroll / this splitting up to the root.
    */
   bool insert_descend(node *n, const key_type &key,
-                                           const value_type &value,
-                                           key_type *splitkey,
-                                           node **splitnode, unsigned &split_size) {
+                      const value_type &value,
+                      key_type *splitkey,
+                      node **splitnode, unsigned &split_size) {
 
     bool is_in_split_node = false;
 
@@ -1700,6 +1514,121 @@ class BTree {
   //! \name Bulk Loader - Construct Tree from Sorted Sequence
   //! \{
 
+  //! Bulk load a sorted range. Loads items into leaves and constructs a
+  //! B-tree above them. The tree must be empty when calling this function.
+  template<typename Iterator>
+  void bulk_load(Iterator ibegin, Iterator iend) {
+
+    stats_.size = iend - ibegin;
+
+    // calculate number of leaves needed, round up.
+    size_t num_items = iend - ibegin;
+    size_t num_leaves = (num_items + leaf_slotmax - 1) / leaf_slotmax;
+
+    LeafNode **leaves = new LeafNode*[num_items];
+    int leaf_cnt = 0;
+
+    Iterator it = ibegin;
+    for (size_t i = 0; i < num_leaves; ++i) {
+      // allocate new leaf node
+      LeafNode *leaf = allocate_leaf();
+      leaves[leaf_cnt++] = leaf;
+
+      // copy keys or (key,value) pairs into leaf nodes, uses template
+      // switch leaf->set_slot().
+      leaf->slotuse = static_cast<int>(num_items / (num_leaves - i));
+      for (size_t s = 0; s < leaf->slotuse; ++s, ++it)
+        leaf->set_slot(s, *it);
+
+      num_items -= leaf->slotuse;
+    }
+
+    // if the btree is so small to fit into one leaf, then we're done.
+    if (leaf_cnt == 1) {
+      root_ = leaves[0];
+      return;
+    }
+
+    // create first level of inner nodes, pointing to the leaves.
+    size_t num_parents =
+        (num_leaves + (inner_slotmax + 1) - 1) / (inner_slotmax + 1);
+
+    // save inner nodes and maxkey and subtree size for next level.
+    typedef std::tuple<InnerNode *, const key_type *, unsigned int> nextlevel_type;
+    nextlevel_type *nextlevel = new nextlevel_type[num_parents];
+
+    LeafNode *leaf;
+    int cur_leaf = 0;
+    for (size_t i = 0; i < num_parents; ++i) {
+      // allocate new inner node at level 1
+      InnerNode *n = allocate_inner(1);
+
+      n->slotuse = static_cast<int>(num_leaves / (num_parents - i));
+      // this counts keys, but an inner node has keys+1 children.
+      --n->slotuse;
+
+      // copy last key from each leaf and set child
+      for (unsigned short s = 0; s < n->slotuse; ++s) {
+        leaf = leaves[cur_leaf++];
+        n->slotkey[s] = leaf->key(leaf->slotuse - 1);
+        n->child_info[s] = std::make_pair(leaf, leaf->slotuse);
+        n->size += leaf->slotuse;
+      }
+
+      leaf = leaves[cur_leaf++];
+      n->child_info[n->slotuse] = std::make_pair(leaf, leaf->slotuse);
+      n->size += leaf->slotuse;
+
+      // track max key of any descendant.
+      nextlevel[i] = std::make_tuple(n, &leaf->key(leaf->slotuse - 1), n->size);
+
+      num_leaves -= n->slotuse + 1;
+    }
+
+    // recursively build inner nodes pointing to inner nodes.
+    for (int level = 2; num_parents != 1; ++level) {
+      size_t num_children = num_parents;
+      num_parents =
+          (num_children + (inner_slotmax + 1) - 1) / (inner_slotmax + 1);
+
+
+      size_t inner_index = 0;
+      for (size_t i = 0; i < num_parents; ++i) {
+        // allocate new inner node at level
+        InnerNode *n = allocate_inner(level);
+
+        n->slotuse = static_cast<int>(num_children / (num_parents - i));
+        // this counts keys, but an inner node has keys+1 children.
+        --n->slotuse;
+
+        const key_type *key_addr;
+        int temp_child_size;
+
+        // copy children and maxkeys from nextlevel
+        for (unsigned short s = 0; s < n->slotuse; ++s) {
+          std::tie(n->child_info[s].first, key_addr, n->child_info[s].second) = nextlevel[inner_index];
+          n->slotkey[s] = *key_addr;
+          n->size += n->child_info[s].second;
+          ++inner_index;
+        }
+        std::tie(n->child_info[n->slotuse].first, key_addr, n->child_info[n->slotuse].second) = nextlevel[inner_index];
+        n->size += n->child_info[n->slotuse].second;
+
+        // reuse nextlevel array for parents, because we can overwrite
+        // slots we've already consumed.
+        nextlevel[i] = std::make_tuple(n, key_addr, n->size);
+
+        ++inner_index;
+        num_children -= n->slotuse + 1;
+      }
+
+    }
+
+    root_ = std::get<0>(nextlevel[0]);
+    delete[] nextlevel;
+
+  }
+
   //! \}
 
  private:
@@ -1724,7 +1653,6 @@ class BTree {
 
     return c;
   }
-
 
 #ifdef BTREE_TODO
   //! Erase all key/data pairs in the range [first,last). This function is
