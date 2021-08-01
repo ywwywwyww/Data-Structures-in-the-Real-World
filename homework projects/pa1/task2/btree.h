@@ -93,9 +93,9 @@ struct btree_default_traits {
   //! printable.
   static const bool debug = false;
 
-  constexpr static const double leaf_load_factor = 0.75;
+  constexpr static const double leaf_load_factor = 1;
 
-  constexpr static const double inner_load_factor = 0.75;
+  constexpr static const double inner_load_factor = 1;
 
   //! Number of slots in each leaf of the tree. Estimated so that each node
   //! has a size of about 256 bytes.
