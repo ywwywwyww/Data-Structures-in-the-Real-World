@@ -95,6 +95,8 @@ struct btree_default_traits {
 
   constexpr static const double leaf_load_factor = 0.75;
 
+  constexpr static const double inner_load_factor = 0.75;
+
   //! Number of slots in each leaf of the tree. Estimated so that each node
   //! has a size of about 256 bytes.
   static const int leaf_slots = TLX_BTREE_MAX(8, 256 / (sizeof(Value)));
@@ -186,6 +188,8 @@ class BTree {
   //! \{
 
   constexpr static const double leaf_load_factor = traits::leaf_load_factor;
+
+  constexpr static const double inner_load_factor = traits::inner_load_factor;
 
   //! Base B+ tree parameter: The number of key/data slots in each leaf
   static const unsigned short leaf_slotmax = traits::leaf_slots;
@@ -1559,9 +1563,11 @@ class BTree {
       return;
     }
 
+
+    size_t slotmax2 = ceil(inner_slotmax * inner_load_factor);
     // create first level of inner nodes, pointing to the leaves.
     size_t num_parents =
-        (num_leaves + (inner_slotmax + 1) - 1) / (inner_slotmax + 1);
+        (num_leaves + (slotmax2 + 1) - 1) / (slotmax2 + 1);
 
     // save inner nodes and maxkey and subtree size for next level.
     typedef std::tuple<InnerNode *, const key_type *, unsigned int> nextlevel_type;
@@ -1599,7 +1605,7 @@ class BTree {
     for (int level = 2; num_parents != 1; ++level) {
       size_t num_children = num_parents;
       num_parents =
-          (num_children + (inner_slotmax + 1) - 1) / (inner_slotmax + 1);
+          (num_children + (slotmax2 + 1) - 1) / (slotmax2 + 1);
 
 
       size_t inner_index = 0;
