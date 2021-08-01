@@ -1519,6 +1519,10 @@ class BTree {
   template<typename Iterator>
   void bulk_load(Iterator ibegin, Iterator iend) {
 
+    if (ibegin == iend) {
+      return;
+    }
+
     stats_.size = iend - ibegin;
 
     // calculate number of leaves needed, round up.
