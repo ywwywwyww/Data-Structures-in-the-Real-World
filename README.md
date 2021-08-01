@@ -7,8 +7,8 @@ course 'Data Structures in the Real World' in freshman year, summer semester
 
 - [ ] SIMD 
 
-- [ ] 调整块大小
-- [ ] 调整编译选项
+- [x] 调整块大小
+- [x] 调整编译选项
 
 case1 的测试结果 (7.31)：
 
