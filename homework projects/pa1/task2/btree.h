@@ -243,11 +243,12 @@ class BTree {
     //! Keys of children or data pointers
     key_type slotkey[inner_slotmax]; // NOLINT
 
-    //! Pointers to children
-    node *childid[inner_slotmax + 1]; // NOLINT
+    //! Pointers to children and the sizes
+//    node *childid[inner_slotmax + 1]; // NOLINT
 
-    //! Size of children
-    unsigned int child_size[inner_slotmax + 1];
+//    int child_size[inner_slotmax + 1];
+
+    std::pair<node*, unsigned int> child_info[inner_slotmax + 1];
 
     //! Size of this subtree
     unsigned int size;
@@ -969,8 +970,8 @@ class BTree {
       InnerNode *innernode = static_cast<InnerNode *>(n);
 
       for (unsigned short slot = 0; slot < innernode->slotuse + 1; ++slot) {
-        clear_recursive(innernode->childid[slot]);
-        free_node(innernode->childid[slot]);
+        clear_recursive(innernode->child_info[slot].first);
+        free_node(innernode->child_info[slot].first);
       }
     }
   }
@@ -1153,7 +1154,7 @@ class BTree {
       const InnerNode *inner = static_cast<const InnerNode *>(n);
       unsigned short slot = find_lower(inner, key);
 
-      n = inner->childid[slot];
+      n = inner->child_info[slot].first;
     }
 
     const LeafNode *leaf = static_cast<const LeafNode *>(n);
@@ -1173,7 +1174,7 @@ class BTree {
       const InnerNode *inner = static_cast<const InnerNode *>(n);
       unsigned short slot = find_lower(inner, key);
 
-      n = inner->childid[slot];
+      n = inner->child_info[slot].first;
     }
 
     LeafNode *leaf = static_cast<LeafNode *>(n);
@@ -1195,7 +1196,7 @@ class BTree {
       const InnerNode *inner = static_cast<const InnerNode *>(n);
       unsigned short slot = find_lower(inner, key);
 
-      n = inner->childid[slot];
+      n = inner->child_info[slot].first;
     }
 
     const LeafNode *leaf = static_cast<const LeafNode *>(n);
@@ -1218,10 +1219,10 @@ class BTree {
       unsigned short slot = find_lower(inner, key);
 
       for (int i = 0; i < slot; i++) {
-        ans += inner->child_size[i];
+        ans += inner->child_info[i].second;
       }
 
-      n = inner->childid[slot];
+      n = inner->child_info[slot].first;
     }
 
     const LeafNode *leaf = static_cast<const LeafNode *>(n);
@@ -1248,7 +1249,7 @@ class BTree {
       const InnerNode *inner = static_cast<const InnerNode *>(n);
       unsigned short slot = find_lower(inner, key);
 
-      n = inner->childid[slot];
+      n = inner->child_info[slot].first;
     }
 
     LeafNode *leaf = static_cast<LeafNode *>(n);
@@ -1268,7 +1269,7 @@ class BTree {
       const InnerNode *inner = static_cast<const InnerNode *>(n);
       unsigned short slot = find_lower(inner, key);
 
-      n = inner->childid[slot];
+      n = inner->child_info[slot].first;
     }
 
     const LeafNode *leaf = static_cast<const LeafNode *>(n);
@@ -1288,7 +1289,7 @@ class BTree {
       const InnerNode *inner = static_cast<const InnerNode *>(n);
       unsigned short slot = find_upper(inner, key);
 
-      n = inner->childid[slot];
+      n = inner->child_info[slot].first;
     }
 
     LeafNode *leaf = static_cast<LeafNode *>(n);
@@ -1308,7 +1309,7 @@ class BTree {
       const InnerNode *inner = static_cast<const InnerNode *>(n);
       unsigned short slot = find_upper(inner, key);
 
-      n = inner->childid[slot];
+      n = inner->child_info[slot].first;
     }
 
     const LeafNode *leaf = static_cast<const LeafNode *>(n);
@@ -1440,11 +1441,11 @@ class BTree {
       InnerNode *newroot = allocate_inner(root_->level + 1);
       newroot->slotkey[0] = newkey;
 
-      newroot->childid[0] = root_;
-      newroot->childid[1] = newchild;
+      newroot->child_info[0].first = root_;
+      newroot->child_info[1].first = newchild;
 
-      newroot->child_size[0] = stats_.size - new_size;
-      newroot->child_size[1] = new_size;
+      newroot->child_info[0].second = stats_.size - new_size;
+      newroot->child_info[1].second = new_size;
 
       newroot->size = stats_.size;
 
@@ -1483,12 +1484,12 @@ class BTree {
 
       unsigned short slot = find_lower(inner, key);
 
-      TLX_BTREE_PRINT("BTree::insert_descend into " << inner->childid[slot]);
+      TLX_BTREE_PRINT("BTree::insert_descend into " << inner->child_info[slot].first);
 
       bool r =
-          insert_descend(inner->childid[slot], key, value, &newkey, &newchild, new_size);
+          insert_descend(inner->child_info[slot].first, key, value, &newkey, &newchild, new_size);
       if (r == true) {
-        inner->child_size[slot]++;
+        inner->child_info[slot].second++;
         inner->size++;
       }
 
@@ -1496,7 +1497,7 @@ class BTree {
         TLX_BTREE_PRINT("BTree::insert_descend newchild"
                             << " with key " << newkey << " node " << newchild
                             << " at slot " << slot);
-        inner->child_size[slot] -= new_size;
+        inner->child_info[slot].second -= new_size;
         inner->size -= new_size;
 
         if (inner->is_full()) {
@@ -1529,18 +1530,18 @@ class BTree {
 
             // move the split key and it's datum into the left node
             inner->slotkey[inner->slotuse] = *splitkey;
-            inner->childid[inner->slotuse + 1] = split->childid[0];
-            inner->child_size[inner->slotuse + 1] = split->child_size[0];
-            split->size -= split->child_size[0];
-            split_size -= split->child_size[0];
-            inner->size += split->child_size[0];
+            inner->child_info[inner->slotuse + 1].first = split->child_info[0].first;
+            inner->child_info[inner->slotuse + 1].second = split->child_info[0].second;
+            split->size -= split->child_info[0].second;
+            split_size -= split->child_info[0].second;
+            inner->size += split->child_info[0].second;
             inner->slotuse++;
 
             // set new split key and move corresponding datum into
             // right node
-            split->childid[0] = newchild;
+            split->child_info[0].first = newchild;
             *splitkey = newkey;
-            split->child_size[0] = new_size;
+            split->child_info[0].second = new_size;
             split->size += new_size;
             split_size += new_size;
 
@@ -1564,16 +1565,13 @@ class BTree {
         std::copy_backward(inner->slotkey + slot,
                            inner->slotkey + inner->slotuse,
                            inner->slotkey + inner->slotuse + 1);
-        std::copy_backward(inner->childid + slot,
-                           inner->childid + inner->slotuse + 1,
-                           inner->childid + inner->slotuse + 2);
-        std::copy_backward(inner->child_size + slot,
-                           inner->child_size + inner->slotuse + 1,
-                           inner->child_size + inner->slotuse + 2);
+        std::copy_backward(inner->child_info + slot,
+                           inner->child_info + inner->slotuse + 1,
+                           inner->child_info + inner->slotuse + 2);
 
         inner->slotkey[slot] = newkey;
-        inner->childid[slot + 1] = newchild;
-        inner->child_size[slot + 1] = new_size;
+        inner->child_info[slot + 1].first = newchild;
+        inner->child_info[slot + 1].second = new_size;
         inner->size += new_size;
         inner->slotuse++;
         if (is_in_split_node) {
@@ -1682,13 +1680,11 @@ class BTree {
 
     std::copy(inner->slotkey + mid + 1, inner->slotkey + inner->slotuse,
               newinner->slotkey);
-    std::copy(inner->childid + mid + 1, inner->childid + inner->slotuse + 1,
-              newinner->childid);
-    std::copy(inner->child_size + mid + 1, inner->child_size + inner->slotuse + 1,
-              newinner->child_size);
+    std::copy(inner->child_info + mid + 1, inner->child_info + inner->slotuse + 1,
+              newinner->child_info);
 
     for (int i = 0; i <= newinner->slotuse; i++) {
-      newinner->size += newinner->child_size[i];
+      newinner->size += newinner->child_info[i].second;
     }
     inner->size -= newinner->size;
     inner->slotuse = mid;
