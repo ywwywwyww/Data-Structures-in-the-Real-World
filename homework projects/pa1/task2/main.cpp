@@ -102,8 +102,8 @@ int main() {
 //  printf("press any key to continue...");
 //  getchar();
 
-  freopen("1.in", "r", stdin);
-  freopen("1.ans", "w", stdout);
+//  freopen("1.in", "r", stdin);
+//  freopen("1.ans", "w", stdout);
 
   tlx::btree_set<int> set;
 
