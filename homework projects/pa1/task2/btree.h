@@ -23,6 +23,7 @@
 #include <memory>
 #include <ostream>
 #include <utility>
+#include <cmath>
 
 namespace tlx {
 
@@ -91,6 +92,8 @@ struct btree_default_traits {
   //! compiled with TLX_BTREE_DEBUG defined and key_type must be std::ostream
   //! printable.
   static const bool debug = false;
+
+  constexpr static const double leaf_load_factor = 0.75;
 
   //! Number of slots in each leaf of the tree. Estimated so that each node
   //! has a size of about 256 bytes.
@@ -181,6 +184,8 @@ class BTree {
  public:
   //! \name Static Constant Options and Values of the B+ Tree
   //! \{
+
+  constexpr static const double leaf_load_factor = traits::leaf_load_factor;
 
   //! Base B+ tree parameter: The number of key/data slots in each leaf
   static const unsigned short leaf_slotmax = traits::leaf_slots;
@@ -1527,7 +1532,8 @@ class BTree {
 
     // calculate number of leaves needed, round up.
     size_t num_items = iend - ibegin;
-    size_t num_leaves = (num_items + leaf_slotmax - 1) / leaf_slotmax;
+    size_t slotmax = ceil(leaf_slotmax * leaf_load_factor);
+    size_t num_leaves = (num_items + slotmax - 1) / slotmax;
 
     LeafNode **leaves = new LeafNode*[num_items];
     int leaf_cnt = 0;
