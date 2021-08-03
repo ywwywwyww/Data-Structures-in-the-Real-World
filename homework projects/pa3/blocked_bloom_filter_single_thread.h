@@ -58,7 +58,8 @@ class BlockedBloomFilterSingleThread : public BlockedBloomFilterBase {
     int pattern_id = GetPatternId(str);
     for (int i = 0; i < kBlockLen; i++) {
       __m256i temp = _mm256_or_si256(table_[block_id * kBlockLen + i], pattern_[pattern_id][i]);
-      int res = _mm256_cmpeq_epi32_mask(temp, table_[block_id * kBlockLen + i]);
+      __m256i mask = _mm256_cmpeq_epi32(temp, table_[block_id * kBlockLen + i]);
+      int res = _mm256_movemask_epi8(mask);
       if (res != 0xff) {
         return false;
       }
