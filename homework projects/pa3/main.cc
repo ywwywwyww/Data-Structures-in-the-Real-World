@@ -27,9 +27,11 @@ BlockedBloomFilterBase *bloom_filter;
 int *ans;
 
 void test(int thread_id) {
+  //bloom_filter->Prefetch();
   for (auto &op: data[thread_id]) {
     if (op.type == 1) {
       bloom_filter->Insert(op.key);
+      //op.ans = bloom_filter->Query(op.key);
     } else {
       op.ans = bloom_filter->Query(op.key);
     }
@@ -41,27 +43,27 @@ int main(int argc, char **argv) {
   //       0: single thread version with blocked bloom filter
   //   1~100: multi-thread version with atomic operation
   // 101~200: multi-thread version with shared mutex and SIMD
-  int num_threads = -1;
+  int num_threads;
 
-//  if (argc == 2) {
-//    num_threads = atoi(argv[1]);
-//  } else {
-//    fprintf(stderr, "Please input the number of threads\n");
-//    return 0;
-//  }
+  if (argc == 2) {
+    num_threads = atoi(argv[1]);
+  } else {
+    fprintf(stderr, "Please input the number of threads\n");
+    return 0;
+  }
   fprintf(stderr, "num_threads: %d\n", num_threads);
 
   if (num_threads == -1) {
     bloom_filter = new BloomFilter();
     num_threads = 1;
-//  } else if (num_threads == 0) {
-//    bloom_filter = new BlockedBloomFilterSingleThread();
-//    num_threads = 1;
-//  } else if (num_threads <= 100) {
-//    bloom_filter = new BlockedBloomFilterAtomic();
-//  } else {
-//    bloom_filter = new BlockedBloomFilterSharedMutex();
-//    num_threads -= 100;
+  } else if (num_threads == 0) {
+    bloom_filter = new BlockedBloomFilterSingleThread();
+    num_threads = 1;
+  } else if (num_threads <= 100) {
+    bloom_filter = new BlockedBloomFilterAtomic();
+  } else {
+    bloom_filter = new BlockedBloomFilterSharedMutex();
+    num_threads -= 100;
   }
 
   int n = 0;
@@ -89,6 +91,8 @@ int main(int argc, char **argv) {
   }
   ans = new int[n];
 
+  printf("...\n");
+  getchar();
   auto start = std::chrono::high_resolution_clock::now();
 
 //  auto **threads = new std::thread*[num_threads];

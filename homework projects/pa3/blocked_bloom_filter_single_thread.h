@@ -60,11 +60,17 @@ class BlockedBloomFilterSingleThread : public BlockedBloomFilterBase {
       __m256i temp = _mm256_or_si256(table_[block_id * kBlockLen + i], pattern_[pattern_id][i]);
       __m256i mask = _mm256_cmpeq_epi32(temp, table_[block_id * kBlockLen + i]);
       int res = _mm256_movemask_epi8(mask);
-      if (res != 0xff) {
+      if (res != -1) {
         return false;
       }
     }
     return true;
+  }
+
+  void Prefetch() override {
+	  for (int i = 0; i < kNumPatterns; i++) {
+		  __builtin_prefetch(pattern_[i]);
+	  }
   }
 
   __m256i table_[kNumBlocks * kBlockLen];

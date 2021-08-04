@@ -8,7 +8,8 @@
 #include <shared_mutex>
 #include "blocked_bloom_filter_base.h"
 
-class BlockedBloomFilterSharedMutex : BlockedBloomFilterBase {
+class BlockedBloomFilterSharedMutex : public BlockedBloomFilterBase {
+ public:
   static const int kBlockLen = kBlockSize / 256; // Length of each block
 
   BlockedBloomFilterSharedMutex() {
@@ -54,7 +55,7 @@ class BlockedBloomFilterSharedMutex : BlockedBloomFilterBase {
       __m256i temp = _mm256_or_si256(table_[block_id * kBlockLen + i], pattern_[pattern_id][i]);
       __m256i mask = _mm256_cmpeq_epi32(temp, table_[block_id * kBlockLen + i]);
       int res = _mm256_movemask_epi8(mask);
-      if (res != 0xff) {
+      if (res != -1) {
         lock_[block_id].unlock_shared();
         return false;
       }

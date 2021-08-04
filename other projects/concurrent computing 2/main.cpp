@@ -5,7 +5,7 @@
 #include <iostream>
 #include <atomic>
 
-const int kNumThreads = 32;
+const int kNumThreads = 1;
 const int n = 100000000;
 const int gap = 1024;
 std::shared_mutex lock[kNumThreads * gap];
@@ -15,10 +15,10 @@ int counter[kNumThreads * gap];
 
 void run(int thread_id) {
 	for (int i = 1; i <= n; i++) {
-		//lock[thread_id * gap].lock();
-		//counter[thread_id * gap]++;
-		//lock[thread_id * gap].unlock();
-		arr[thread_id * gap]++;
+		lock[thread_id * gap].lock();
+		counter[thread_id * gap]++;
+		lock[thread_id * gap].unlock();
+		//arr[thread_id * gap]++;
 	}
 }
 int main() {
