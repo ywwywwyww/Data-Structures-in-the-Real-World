@@ -1,9 +1,7 @@
 # Data-Structures-in-the-Real-World
 course 'Data Structures in the Real World' in freshman year, summer semester
 
-## PA1
-
-### Part2
+## PA2
 
 - [ ] SIMD 
 
@@ -43,7 +41,11 @@ d-misses,branches,branch-misses -p 96751
 
 8.2 测试结果：4.55 3.25 4.35 1.76 4.55 1.10 4.71
 
-## PA2
+
+
+作业报告见 `/codes/homework projects/pa2/report/report.pdf`.
+
+## PA3
 
 - Cache line size: 64
 - L2 cache size: 512K
@@ -60,20 +62,24 @@ d-misses,branches,branch-misses -p 96751
 
 
 
+(project: other projects/concorrent programming 2)
+
 每个线程 1e8 次 inc 操作，计数器不同
 
 串行：<< 1s
 
 | NumThreads | atomic add (in the same block) | shared_mutex (in the same block) | atomic add | shared_mutex |
 | ---------- | ------------------------------ | -------------------------------- | ---------- | ------------ |
-| 1          | 0.56s                          | 2.26s                            | 0.57s      |              |
-| 2          | 1.7s                           | ~25s                             |            |              |
-| 4          | 3.4s                           | ~55s                             |            |              |
-| 8          | 8s                             | ~90s                             |            |              |
-| 16         | 21s                            | ~130s                            | 0.63s      |              |
-| 32         | 32s                            | ~140s                            | 0.69s      |              |
+| 1          | 0.56s                          | 2.26s                            | 0.55s      | 2.0s         |
+| 2          | 1.7s                           | 25s                              | 0.56s      | 2.05s        |
+| 4          | 3.4s                           | 55s                              | 0.59s      | 2.1s         |
+| 8          | 8s                             | 90s                              | 0.61s      | 2.15s        |
+| 16         | 21s                            | 130s                             | 0.62s      | 2.4s         |
+| 32         | 32s                            | 140s                             | 0.66s      | 2.6s         |
 
 （前两个程序中计数器的内存地址是相邻的，因此会对内存的 fetch 有影响）
+
+看来锁是挺慢的；两种方法的 scalability 看起来差不多
 
 
 
