@@ -12,6 +12,7 @@
 #include "blocked_bloom_filter_atomic.h"
 #include "blocked_bloom_filter_shared_mutex.h"
 #include "bloom_filter.h"
+#include "bloom_filter_atomic.h"
 #include "fast_io.h"
 
 class Operation {
