@@ -40,10 +40,11 @@ void test(int thread_id) {
 }
 
 int main(int argc, char **argv) {
-  //      -1: single thread version with standard bloom filter
-  //       0: single thread version with blocked bloom filter
-  //   1~100: multi-thread version with atomic operation
-  // 101~200: multi-thread version with shared mutex and SIMD
+  //      -1: single thread standard bloom filter
+  //       0: single thread bit pattern bloom filter using SIMD
+  //   1~100: multi-thread bit pattern bloom filter using atomic operation
+  // 101~200: multi-thread bit pattern bloom filter using shared mutex and SIMD
+  // 201~300: multi-thread standard bloom filter
   int num_threads;
 
   if (argc == 2) {
@@ -62,9 +63,12 @@ int main(int argc, char **argv) {
     num_threads = 1;
   } else if (num_threads <= 100) {
     bloom_filter = new BlockedBloomFilterAtomic();
-  } else {
+  } else if (num_threads <= 200) {
     bloom_filter = new BlockedBloomFilterSharedMutex();
     num_threads -= 100;
+  } else {
+    bloom_filter = new BloomFilterAtomic();
+    num_threads -= 200;
   }
 
   int n = 0;
@@ -92,8 +96,8 @@ int main(int argc, char **argv) {
   }
   ans = new int[n];
 
-  printf("...\n");
-  getchar();
+//  printf("...\n");
+//  getchar();
   auto start = std::chrono::high_resolution_clock::now();
 
 //  auto **threads = new std::thread*[num_threads];
