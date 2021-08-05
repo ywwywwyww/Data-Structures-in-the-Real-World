@@ -100,14 +100,14 @@ int main(int argc, char **argv) {
 //  getchar();
   auto start = std::chrono::high_resolution_clock::now();
 
-//  auto **threads = new std::thread*[num_threads];
-//  for (int i = 0; i < num_threads; i++) {
-//    threads[i] = new std::thread(test, i);
-//  }
-//  for (int i = 0; i < num_threads; i++) {
-//    threads[i]->join();
-//  }
-  test(0);
+  auto **threads = new std::thread*[num_threads];
+  for (int i = 0; i < num_threads; i++) {
+    threads[i] = new std::thread(test, i);
+  }
+  for (int i = 0; i < num_threads; i++) {
+    threads[i]->join();
+  }
+//  test(0);
 
   auto stop = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
