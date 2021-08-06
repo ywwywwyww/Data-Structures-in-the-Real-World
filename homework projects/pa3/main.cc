@@ -44,29 +44,28 @@ int main(int argc, char **argv) {
   }
   fprintf(stderr, "num_threads: %d\n", num_threads);
 
-  int n = 0;
+
+  io::open_input_file("data.in");
+  int n;
+  io::get(n);
   data = new std::vector<Operation>*[num_threads];
   for (int i = 0; i < num_threads; i++) {
     data[i] = new std::vector<Operation>{};
-    int ni;
+  }
+  for(int i = 0; i < n; i++) {
+    Operation datum{};
     char op[10];
-    char filename[20];
-    sprintf(filename, "data%d.in", i + 1);
-    io::open_input_file(filename);
-    io::get(ni);
-    n += ni;
-    for(int j = 0; j < ni; j++) {
-      data[i]->emplace_back();
-      io::getstr(op);
-      if (op[0] == 'i') {
-        data[i]->back().type = 1;
-      } else {
-        data[i]->back().type = 2;
-      }
-      io::getstr(data[i]->back().key);
-      io::get(data[i]->back().time);
-      data[i]->back().ans = -1;
+    io::getstr(op);
+    if (op[0] == 'i') {
+      datum.type = 1;
+    } else {
+      datum.type = 2;
     }
+    io::getstr(datum.key);
+    io::get(datum.time);
+    datum.ans = -1;
+    XXH64_hash_t hash = XXH3_64bits_withSeed(datum.key, kStrLen, /* Seed */ 2395728357235ll);
+    data[hash % num_threads]->push_back(datum);
   }
   ans = new int[n];
   Init();
