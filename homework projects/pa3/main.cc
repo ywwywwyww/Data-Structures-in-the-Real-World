@@ -42,9 +42,9 @@ void test(int thread_id) {
 int main(int argc, char **argv) {
   //      -1: single thread standard bloom filter
   //       0: single thread bit pattern bloom filter using SIMD
-  //   1~100: multi-thread bit pattern bloom filter using atomic operation
-  // 101~200: multi-thread bit pattern bloom filter using shared mutex and SIMD
-  // 201~300: multi-thread standard bloom filter
+  //   1~100: multi-thread standard bloom filter using atomic operation
+  // 101~200: multi-thread bit pattern bloom filter using atomic operation
+  // 201~300: multi-thread bit pattern bloom filter using shared mutex and SIMD
   int num_threads;
 
   if (argc == 2) {
@@ -62,12 +62,12 @@ int main(int argc, char **argv) {
     bloom_filter = new BlockedBloomFilterSingleThread();
     num_threads = 1;
   } else if (num_threads <= 100) {
-    bloom_filter = new BlockedBloomFilterAtomic();
+    bloom_filter = new BloomFilterAtomic();
   } else if (num_threads <= 200) {
-    bloom_filter = new BlockedBloomFilterSharedMutex();
+    bloom_filter = new BlockedBloomFilterAtomic();
     num_threads -= 100;
   } else {
-    bloom_filter = new BloomFilterAtomic();
+    bloom_filter = new BlockedBloomFilterSharedMutex();
     num_threads -= 200;
   }
 

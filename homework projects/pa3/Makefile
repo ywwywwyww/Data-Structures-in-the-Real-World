@@ -4,7 +4,7 @@ sOBJECTS1=$(sSOURCES:%.cpp=%.o)
 sOBJECTS2=$(sOBJECTS1:%.cxx=%.o)
 sOBJECTS=$(sOBJECTS2:%.cc=%.o)
 TARGET=$(shell pwd |sed 's/^\(.*\)[/]//' )
-COMPILEOPTION=-std=c++17 -lpthread -O3 -mavx2
+COMPILEOPTION=-std=c++17 -lpthread -O3 -mavx2 -march=native -frename-registers -funroll-all-loops
 
 
 all: $(TARGET)
