@@ -7,13 +7,8 @@
 #include <iomanip>
 #include <fstream>
 
-#include "blocked_bloom_filter_base.h"
-#include "blocked_bloom_filter_single_thread.h"
-#include "blocked_bloom_filter_atomic.h"
-#include "blocked_bloom_filter_shared_mutex.h"
-#include "bloom_filter.h"
-#include "bloom_filter_atomic.h"
 #include "fast_io.h"
+#include "bloom_filter.h"
 
 class Operation {
  public:
@@ -23,28 +18,22 @@ class Operation {
   int ans;
 };
 
-std::vector<Operation> *data;
-BlockedBloomFilterBase *bloom_filter;
+std::vector<Operation> **data;
 int *ans;
 
 void test(int thread_id) {
   //bloom_filter->Prefetch();
-  for (auto &op: data[thread_id]) {
+  for (auto &op: *data[thread_id]) {
     if (op.type == 1) {
-      bloom_filter->Insert(op.key);
+      Insert(op.key);
       //op.ans = bloom_filter->Query(op.key);
     } else {
-      op.ans = bloom_filter->Query(op.key);
+      op.ans = Query(op.key);
     }
   }
 }
 
 int main(int argc, char **argv) {
-  //      -1: single thread standard bloom filter
-  //       0: single thread bit pattern bloom filter using SIMD
-  //   1~100: multi-thread standard bloom filter using atomic operation
-  // 101~200: multi-thread bit pattern bloom filter using atomic operation
-  // 201~300: multi-thread bit pattern bloom filter using shared mutex and SIMD
   int num_threads;
 
   if (argc == 2) {
@@ -55,25 +44,10 @@ int main(int argc, char **argv) {
   }
   fprintf(stderr, "num_threads: %d\n", num_threads);
 
-  if (num_threads == -1) {
-    bloom_filter = new BloomFilter();
-    num_threads = 1;
-  } else if (num_threads == 0) {
-    bloom_filter = new BlockedBloomFilterSingleThread();
-    num_threads = 1;
-  } else if (num_threads <= 100) {
-    bloom_filter = new BloomFilterAtomic();
-  } else if (num_threads <= 200) {
-    bloom_filter = new BlockedBloomFilterAtomic();
-    num_threads -= 100;
-  } else {
-    bloom_filter = new BlockedBloomFilterSharedMutex();
-    num_threads -= 200;
-  }
-
   int n = 0;
-  data = new std::vector<Operation>[num_threads];
+  data = new std::vector<Operation>*[num_threads];
   for (int i = 0; i < num_threads; i++) {
+    data[i] = new std::vector<Operation>{};
     int ni;
     char op[10];
     char filename[20];
@@ -82,19 +56,20 @@ int main(int argc, char **argv) {
     io::get(ni);
     n += ni;
     for(int j = 0; j < ni; j++) {
-      data[i].emplace_back();
+      data[i]->emplace_back();
       io::getstr(op);
       if (op[0] == 'i') {
-        data[i].back().type = 1;
+        data[i]->back().type = 1;
       } else {
-        data[i].back().type = 2;
+        data[i]->back().type = 2;
       }
-      io::getstr(data[i].back().key);
-      io::get(data[i].back().time);
-      data[i].back().ans = -1;
+      io::getstr(data[i]->back().key);
+      io::get(data[i]->back().time);
+      data[i]->back().ans = -1;
     }
   }
   ans = new int[n];
+  Init();
 
 //  printf("...\n");
 //  getchar();
@@ -119,7 +94,7 @@ int main(int argc, char **argv) {
   f_time.close();
 
   for (int i = 0; i < num_threads; i++) {
-    for (auto &&op: data[i]) {
+    for (auto &&op: *data[i]) {
       ans[op.time - 1] = op.ans;
     }
   }
