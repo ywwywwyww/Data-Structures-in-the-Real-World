@@ -39,12 +39,18 @@ void Dispatch(int &n, int num_threads, std::vector<T> **data) {
     XXH64_hash_t hash = XXH3_64bits_withSeed(datum.key, kStrLen, /* Seed */ 95728357235ll);
     int bucket = hash % kNumBuckets;
     if (map[bucket] == -1) {
-      double freq = sqrt((double)n / (i + 1));
-      pdi top = q.top();
-      q.pop();
-      map[bucket] = top.second;
-      top.first += freq;
-      q.push(top);
+//      double freq = sqrt((double)n / (i + 1));
+//      pdi top = q.top();
+//      q.pop();
+//      map[bucket] = top.second;
+//      top.first += freq;
+//      q.push(top);
+      typedef std::pair<int, int> pii;
+      pii s(0x3fffffff, 0);
+      for (int j = 0; j < num_threads; j++) {
+        s = min(s, std::make_pair(data[j]->size()), j);
+      }
+      map[bucket] = s.second;
     }
     data[map[bucket]]->push_back(datum);
   }
