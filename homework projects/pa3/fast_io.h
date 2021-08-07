@@ -40,7 +40,7 @@ void get(T &x) {
     x = x * 10 + c - '0';
   x *= f;
 }
-void open_input_file(char *file_name) {
+void open_input_file(const char *file_name) {
   input_file = fopen(file_name, "r");
 }
 void flush() {
