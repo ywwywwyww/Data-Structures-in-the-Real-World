@@ -6,6 +6,7 @@
 #define PA3__BLOOM_FILTER_PAT_ATOMIC_H_
 
 #include <atomic>
+#include <random>
 
 #include "bloom_filter_base.h"
 
@@ -16,7 +17,7 @@ static const int kBlockLen = kBlockSize / 64;
 std::atomic<ull> table[kNumBlocks * kBlockLen] __attribute__((aligned(64)));
 ull pattern[kNumPatterns][kBlockLen] __attribute__((aligned(64)));
 
-void init() {
+void Init() {
   for (int i = 0; i < kNumBlocks * kBlockLen; i++) {
     table[i].store(0);
   }

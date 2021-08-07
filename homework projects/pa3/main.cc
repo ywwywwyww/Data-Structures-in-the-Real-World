@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
   Dispatch(n, num_threads, data);
 
   for (int i = 0; i < num_threads; i++) {
-	  printf("%5d: %d\n", i, data[i]->size());
+    printf("%5d: %d\n", i, data[i]->size());
   }
 
   ans = new int[n];

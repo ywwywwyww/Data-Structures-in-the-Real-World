@@ -15,6 +15,6 @@
  * BLOOM_FILTER_PAT_ATOMIC : pat[1, 1] with atomic operation
  * BLOOM_FILTER_PAT_MUTEX  : pat[1, 1] with mutex
  */
-#define BLOOM_FILTER_BLO
+#define BLOOM_FILTER_PAT_ATOMIC
 
 #endif //PA3__FLAGS_H_

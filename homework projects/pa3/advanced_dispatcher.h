@@ -17,11 +17,11 @@ void Dispatch(int &n, int num_threads, std::vector<T> **data) {
   int map[kNumBuckets];
   memset(map, -1, sizeof(map));
 
-  typedef std::pair<double, int> pdi;
-  std::priority_queue<pdi, std::vector<pdi>, std::greater<>> q;
-  for (int i = 0; i < num_threads; i++) {
-    q.push(std::make_pair(0, i));
-  }
+  //typedef std::pair<double, int> pdi;
+  //std::priority_queue<pdi, std::vector<pdi>, std::greater<>> q;
+  //for (int i = 0; i < num_threads; i++) {
+  //  q.push(std::make_pair(0, i));
+  //}
 
   io::get(n);
   for(int i = 0; i < n; i++) {
@@ -48,7 +48,7 @@ void Dispatch(int &n, int num_threads, std::vector<T> **data) {
       typedef std::pair<int, int> pii;
       pii s(0x3fffffff, 0);
       for (int j = 0; j < num_threads; j++) {
-        s = min(s, std::make_pair(data[j]->size()), j);
+        s = min(s, pii(data[j]->size(), j));
       }
       map[bucket] = s.second;
     }
