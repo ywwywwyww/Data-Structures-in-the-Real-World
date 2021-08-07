@@ -24,13 +24,13 @@ std::vector<Operation> **data;
 int *ans;
 
 void test(int thread_id) {
-  //bloom_filter->Prefetch();
+  Entry entry_copy = entry;
   for (auto &op: *data[thread_id]) {
     if (op.type == 1) {
-      Insert(op.key);
+      Insert(entry_copy, op.key);
       //op.ans = bloom_filter->Query(op.key);
     } else {
-      op.ans = Query(op.key);
+      op.ans = Query(entry_copy, op.key);
     }
   }
 }
