@@ -15,13 +15,12 @@ void Dispatch(int &n, int num_threads, std::vector<T> **data) {
     char op[10];
     io::getstr(op);
     if (op[0] == 'i') {
-      datum.type = 1;
+      datum.type = -1;
     } else {
-      datum.type = 2;
+      datum.type = 1;
     }
     io::getstr(datum.key);
     io::get(datum.time);
-    datum.ans = -1;
     XXH64_hash_t hash = XXH3_64bits_withSeed(datum.key, kStrLen, /* Seed */ 95728357235ll);
     data[hash % num_threads]->push_back(datum);
   }

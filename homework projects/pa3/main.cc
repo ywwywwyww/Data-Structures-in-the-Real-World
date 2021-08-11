@@ -6,33 +6,36 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+//#include <tbb.h>
 
 #include "fast_io.h"
 #include "bloom_filter.h"
 //#include "basic_dispatcher.h"
 #include "advanced_dispatcher.h"
+//#include "more_advanced_dispatcher.h"
 
 class Operation {
  public:
-  int type; // 1: insert, 2: query
+  int type; // -1: insert, 1: query, also stores the answer
   char key[16];
   int time;
-  int ans;
 };
 
-std::vector<Operation> **data;
-int *ans;
 
-void test(int thread_id) {
-  Entry entry_copy = entry;
-  for (auto &op: *data[thread_id]) {
-    if (op.type == 1) {
-      Insert(entry_copy, op.key);
-      //op.ans = bloom_filter->Query(op.key);
+void test(const int thread_id, const int &num_ops, Operation *ops) {
+  auto start = std::chrono::high_resolution_clock::now();
+  //for (int t = 10; t; t--)
+  for (int i = 0; i < num_ops; i++) {
+    Operation &op = ops[i];
+    if (op.type == -1) {
+      Insert(op.key);
     } else {
-      op.ans = Query(entry_copy, op.key);
+      op.type = Query(op.key);
     }
   }
+  auto stop = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+  std::cerr << thread_id << "(on CPU " << sched_getcpu() << "): duration = " << duration.count() << "us" << std::endl;
 }
 
 int main(int argc, char **argv) {
@@ -48,7 +51,7 @@ int main(int argc, char **argv) {
 
 
   io::open_input_file("data.in");
-  data = new std::vector<Operation>*[num_threads];
+  std::vector<Operation> **data = new std::vector<Operation>*[num_threads];
   for (int i = 0; i < num_threads; i++) {
     data[i] = new std::vector<Operation>{};
   }
@@ -60,7 +63,18 @@ int main(int argc, char **argv) {
     printf("%5d: %d\n", i, data[i]->size());
   }
 
-  ans = new int[n];
+  int *ans = new int[n];
+
+  int *ni = new int[num_threads];
+  Operation **ops = new Operation*[num_threads];
+  for (int i = 0; i < num_threads; i++) {
+	  ni[i] = data[i]->size();
+	  ops[i] = new Operation[ni[i]];
+	  for (int j = 0; j < ni[i]; j++) {
+		  ops[i][j] = (*data[i])[j];
+	  }
+  }
+
   Init();
 
 //  printf("...\n");
@@ -69,11 +83,34 @@ int main(int argc, char **argv) {
 
   auto **threads = new std::thread*[num_threads];
   for (int i = 0; i < num_threads; i++) {
-    threads[i] = new std::thread(test, i);
+    threads[i] = new std::thread(test, i, ni[i], ops[i]);
+
+
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    // 32 threads
+    //CPU_SET(i, &cpuset);
+    //CPU_SET(i / 2 + (i % 2) * 32, &cpuset);
+    CPU_SET(64 / num_threads * i, &cpuset); // fastest
+    //CPU_SET(i / 2, &cpuset);
+    //
+    // 2 threads
+    //CPU_SET(i * 2, &cpuset); // same CCX
+    //CPU_SET(i * 4, &cpuset); // same CCD
+    //CPU_SET(64 / num_threads * i, &cpuset); // different CCD
+    int rc = pthread_setaffinity_np(threads[i]->native_handle(),
+		    sizeof(cpu_set_t), &cpuset);
   }
   for (int i = 0; i < num_threads; i++) {
     threads[i]->join();
   }
+  
+  //tbb::parallel_for(0, num_threads, 1,
+		  //[&](int thread_id) {
+		  //test(thread_id, ni[thread_id], ops[thread_id]);
+				  //});
+
+
 //  test(0);
 
   auto stop = std::chrono::high_resolution_clock::now();
@@ -86,8 +123,8 @@ int main(int argc, char **argv) {
   f_time.close();
 
   for (int i = 0; i < num_threads; i++) {
-    for (auto &&op: *data[i]) {
-      ans[op.time - 1] = op.ans;
+    for (int j = 0; j < ni[i]; j++) {
+      ans[ops[i][j].time - 1] = ops[i][j].type;
     }
   }
   FILE *f_out = fopen("result.out", "w");

@@ -4,8 +4,8 @@
 #include <fstream>
 
 void check(int result[2][2]) {
-	memset(result, 0, sizeof(int) * 4);
-	std::ifstream f_out("../result.out");
+	result[0][0] = result[0][1] = result[1][0] = result[1][1] = 0;
+	std::ifstream f_out("result.out");
 	std::ifstream f_ans("result.ans");
 	int gt, ours;
 	while(f_ans >> gt) {
@@ -24,7 +24,7 @@ double run(int k) {
 	return s;
 }
 void test(int k, double &time, double &fpr, double &fnr) {
-	int times = 1;
+	int times = 3;
 	double s = 0;
 	fpr = 0;
 	fnr = 0;
@@ -54,7 +54,7 @@ void test(const char* name) {
 	f_time << name << ' ';
 	f_fpr << name << ' ';
 	f_fnr << name << ' ';
-	for (int num_threads = 1; num_threads <= 32; num_threads *= 2) {
+	for (int num_threads = 1; num_threads <= 64; num_threads *= 2) {
 		double time, fpr, fnr;
 		test(num_threads, time, fpr, fnr);
 		f_time << time << ' ';
@@ -70,6 +70,7 @@ void test(const char* name) {
 int main() {
 	system("cp ../BFdataNew/result.ans .");
 	system("cp ../BFdataNew/1/data1.in data.in");
+	system("cp ../flags.h backup");
 
 	test("STD");
 	test("STD_ATOMIC");
@@ -83,6 +84,7 @@ int main() {
 	system("rm result.*");
 	system("rm pa3");
 	system("rm time.out");
+	system("mv backup ../flags.h");
 	return 0;
 }
 

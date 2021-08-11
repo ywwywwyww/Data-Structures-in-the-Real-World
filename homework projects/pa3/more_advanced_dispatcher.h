@@ -1,23 +1,34 @@
 //
-// Created by yww on 2021/8/7.
+// Created by yww on 2021/8/8.
 //
 
-#ifndef PA3__ADVANCED_DISPATCHER_H_
-#define PA3__ADVANCED_DISPATCHER_H_
+#ifndef PA3__MORE_ADVANCED_DISPATCHER_H_
+#define PA3__MORE_ADVANCED_DISPATCHER_H_
 
 #include <vector>
 #include <queue>
 #include <algorithm>
+#include <cmath>
+#include <iostream>
 
+const int kNumBuckets = 1 << 20;
+int map[kNumBuckets];
+int cnt[kNumBuckets];
+
+double f(int cnt) {
+	return pow(cnt, 0.9); // 0.09s
+}
 
 template <typename T>
 void Dispatch(int &n, int num_threads, std::vector<T> **data) {
 
-  const int kNumBuckets = 1 << 20;
-  int map[kNumBuckets];
   memset(map, -1, sizeof(map));
+  memset(cnt, 0, sizeof(cnt));
 
-  //int *kinds = new int[num_threads];
+  double *sum = new double[num_threads];
+  for (int i = 0; i < num_threads; i++) {
+	  sum[i] = 0;
+  }
 
   //typedef std::pair<double, int> pdi;
   //std::priority_queue<pdi, std::vector<pdi>, std::greater<>> q;
@@ -47,15 +58,24 @@ void Dispatch(int &n, int num_threads, std::vector<T> **data) {
 //      top.first += freq;
 //      q.push(top);
       typedef std::pair<int, int> pii;
-      pii s(0x3fffffff, 0);
+      //pii s(0x3fffffff, 0);
+      //for (int j = 0; j < num_threads; j++) {
+      //  s = min(s, pii(data[j]->size(), j));
+      //}
+      typedef std::pair<double, int> pdi;
+      pdi s(1e100, 0);
       for (int j = 0; j < num_threads; j++) {
-        s = min(s, pii(data[j]->size(), j));
+	s = min(s, pdi(sum[j], j));
+	//printf("%.10f %d\n", sum[j], j);
       }
       map[bucket] = s.second;
       //kinds[s.second]++;
     }
+    sum[map[bucket]] -= f(cnt[bucket]);
+    cnt[bucket]++;
     data[map[bucket]]->push_back(datum);
+    sum[map[bucket]] += f(cnt[bucket]);
   }
 }
 
-#endif //PA3__ADVANCED_DISPATCHER_H_
+#endif //PA3__MORE_ADVANCED_DISPATCHER_H_
