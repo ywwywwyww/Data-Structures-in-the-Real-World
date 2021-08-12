@@ -59,9 +59,12 @@ int main(int argc, char **argv) {
   int n;
   Dispatch(n, num_threads, data);
 
+  int max_len = 0;
   //for (int i = 0; i < num_threads; i++) {
-  //  printf("%5d: %d\n", i, data[i]->size());
-  //}
+  //printf("%5d: %d\n", i, data[i]->size());
+  //max_len = std::max(max_len, (int)data[i]->size());
+  //
+  //intf("max len: %d\n", max_len);
 
   int *ans = new int[n];
 
