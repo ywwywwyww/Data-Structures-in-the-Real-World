@@ -35,7 +35,7 @@ void test(const int thread_id, const int &num_ops, Operation *ops) {
   }
   auto stop = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-  std::cerr << thread_id << "(on CPU " << sched_getcpu() << "): duration = " << duration.count() << "us" << std::endl;
+  //std::cerr << thread_id << "(on CPU " << sched_getcpu() << "): duration = " << duration.count() << "us" << std::endl;
 }
 
 int main(int argc, char **argv) {
@@ -59,9 +59,9 @@ int main(int argc, char **argv) {
   int n;
   Dispatch(n, num_threads, data);
 
-  for (int i = 0; i < num_threads; i++) {
-    printf("%5d: %d\n", i, data[i]->size());
-  }
+  //for (int i = 0; i < num_threads; i++) {
+  //  printf("%5d: %d\n", i, data[i]->size());
+  //}
 
   int *ans = new int[n];
 
@@ -91,11 +91,11 @@ int main(int argc, char **argv) {
     // 32 threads
     //CPU_SET(i, &cpuset);
     //CPU_SET(i / 2 + (i % 2) * 32, &cpuset);
-    CPU_SET(64 / num_threads * i, &cpuset); // fastest
+    //CPU_SET(64 / num_threads * i, &cpuset); // fastest
     //CPU_SET(i / 2, &cpuset);
     //
     // 2 threads
-    //CPU_SET(i * 2, &cpuset); // same CCX
+    CPU_SET(i * 2, &cpuset); // same CCX
     //CPU_SET(i * 4, &cpuset); // same CCD
     //CPU_SET(64 / num_threads * i, &cpuset); // different CCD
     int rc = pthread_setaffinity_np(threads[i]->native_handle(),

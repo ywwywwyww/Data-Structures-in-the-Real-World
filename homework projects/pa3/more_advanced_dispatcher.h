@@ -17,6 +17,7 @@ int cnt[kNumBuckets];
 
 double f(int cnt) {
 	return pow(cnt, 0.9); // 0.09s
+	//return cnt + 10;
 }
 
 template <typename T>
