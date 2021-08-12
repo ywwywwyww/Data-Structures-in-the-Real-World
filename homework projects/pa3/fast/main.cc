@@ -8,11 +8,56 @@
 #include <fstream>
 //#include <tbb.h>
 
-#include "fast_io.h"
-#include "bloom_filter.h"
-//#include "basic_dispatcher.h"
+
+#include <cmath>
+
+#define XXH_INLINE_ALL
+#include "xxHash/xxhash.c"
+
 #include "advanced_dispatcher.h"
-//#include "more_advanced_dispatcher.h"
+
+
+constexpr int kStrLen = 16; // Length of each string
+
+constexpr int kCacheLineSize = 64; // Bytes
+//constexpr int kL2CacheSize = 512 * 1024; // Bytes
+constexpr int kL3CacheSize = 8 * 1024 * 1024; // Bytes
+
+constexpr int kBlockSize = kCacheLineSize * 8; // The size of each block in bits
+constexpr int kNumKeys = 10000000; // Number of different keys
+constexpr int kNumSlots = 1 << 27; // Number of slots in the bloom filter
+constexpr int kNumHashFunctions = int((double)kNumSlots / kNumKeys * M_LN2); // Number of hash functions
+constexpr int kNumBlocks = (kNumSlots + kBlockSize - 1) / kBlockSize; // Number of blocks
+constexpr int kNumPatterns = /* int((kL3CacheSize * 0.5) / (kBlockSize / 8)) */ 65536; // Number of patterns, use 50% of the L3 cache
+
+static const int kTableLen = kNumSlots / 8;
+std::atomic<uint8_t> table[kTableLen] __attribute__((aligned(64)));
+
+void Init() {}
+
+void Insert(const char *str) {
+  XXH64_hash_t hash = GetHash(str);
+  int block_id = hash % kNumBlocks;
+  XXH64_hash_t hash1 = (hash / kNumBlocks) % kBlockSize;
+  XXH64_hash_t hash2 = (hash / kNumBlocks / kBlockSize) % kBlockSize;
+  for (int i = 0; i < kNumHashFunctions; i++) {
+    int pos = block_id * kBlockSize + (hash1 + i * hash2) % kBlockSize;
+    table[pos / 8] |= 1 << (pos % 8);
+  }
+}
+bool Query(const char *str) {
+  XXH64_hash_t hash = GetHash(str);
+  int block_id = hash % kNumBlocks;
+  XXH64_hash_t hash1 = (hash / kNumBlocks) % kBlockSize;
+  XXH64_hash_t hash2 = (hash / kNumBlocks / kBlockSize) % kBlockSize;
+  for (int i = 0; i < kNumHashFunctions; i++) {
+    int pos = block_id * kBlockSize + (hash1 + i * hash2) % kBlockSize;
+    if (!((table[pos / 8] >> (pos % 8)) & 1)) {
+      return false;
+    }
+  }
+  return true;
+}
 
 class Operation {
  public:
