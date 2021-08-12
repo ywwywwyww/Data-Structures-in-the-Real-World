@@ -9,12 +9,13 @@
 //#include <tbb.h>
 
 
+#include <atomic>
 #include <cmath>
 
 #define XXH_INLINE_ALL
 #include "xxHash/xxhash.c"
 
-#include "advanced_dispatcher.h"
+#include "fast_io.h"
 
 
 constexpr int kStrLen = 16; // Length of each string
@@ -33,31 +34,7 @@ constexpr int kNumPatterns = /* int((kL3CacheSize * 0.5) / (kBlockSize / 8)) */ 
 static const int kTableLen = kNumSlots / 8;
 std::atomic<uint8_t> table[kTableLen] __attribute__((aligned(64)));
 
-void Init() {}
-
-void Insert(const char *str) {
-  XXH64_hash_t hash = GetHash(str);
-  int block_id = hash % kNumBlocks;
-  XXH64_hash_t hash1 = (hash / kNumBlocks) % kBlockSize;
-  XXH64_hash_t hash2 = (hash / kNumBlocks / kBlockSize) % kBlockSize;
-  for (int i = 0; i < kNumHashFunctions; i++) {
-    int pos = block_id * kBlockSize + (hash1 + i * hash2) % kBlockSize;
-    table[pos / 8] |= 1 << (pos % 8);
-  }
-}
-bool Query(const char *str) {
-  XXH64_hash_t hash = GetHash(str);
-  int block_id = hash % kNumBlocks;
-  XXH64_hash_t hash1 = (hash / kNumBlocks) % kBlockSize;
-  XXH64_hash_t hash2 = (hash / kNumBlocks / kBlockSize) % kBlockSize;
-  for (int i = 0; i < kNumHashFunctions; i++) {
-    int pos = block_id * kBlockSize + (hash1 + i * hash2) % kBlockSize;
-    if (!((table[pos / 8] >> (pos % 8)) & 1)) {
-      return false;
-    }
-  }
-  return true;
-}
+#include "advanced_dispatcher.h"
 
 class Operation {
  public:
@@ -69,18 +46,38 @@ class Operation {
 
 void test(const int thread_id, const int &num_ops, Operation *ops) {
   auto start = std::chrono::high_resolution_clock::now();
+  XXH64_hash_t next_hash = XXH3_64bits_withSeed(ops[0].key, kStrLen, /* Seed */ 28375293592153ll);
   //for (int t = 10; t; t--)
   for (int i = 0; i < num_ops; i++) {
-    Operation &op = ops[i];
-    if (op.type == -1) {
-      Insert(op.key);
+    //__builtin_prefetch(&ops[i+1]);
+    XXH64_hash_t hash = next_hash;
+    int block_id = hash % kNumBlocks;
+    XXH64_hash_t hash1 = (hash / kNumBlocks) % kBlockSize;
+    XXH64_hash_t hash2 = (hash / kNumBlocks / kBlockSize) % kBlockSize;
+    __builtin_prefetch(&table[block_id * kBlockSize / 8]);
+    next_hash = XXH3_64bits_withSeed(ops[i + 1].key, kStrLen, /* Seed */ 28375293592153ll);
+
+    if (ops[i].type == -1) {
+      for (int j = 0; j < kNumHashFunctions; j++) {
+        int pos = block_id * kBlockSize + (hash1 + j * hash2) % kBlockSize;
+        table[pos / 8] |= 1 << (pos % 8);
+	//table[thread_id * 100] |= 1 << (pos % 8);
+      }
     } else {
-      op.type = Query(op.key);
+      ops[i].type = 1;
+      for (int j = 0; j < kNumHashFunctions; j++) {
+        int pos = block_id * kBlockSize + (hash1 + j * hash2) % kBlockSize;
+        if (!(table[pos / 8] & (1 << (pos % 8)))) {
+        //if (!((table[thread_id * 100] >> (pos % 8)) & 1)) {
+          ops[i].type = 0;
+          break;
+        }
+      }
     }
   }
   auto stop = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-  //std::cerr << thread_id << "(on CPU " << sched_getcpu() << "): duration = " << duration.count() << "us" << std::endl;
+  std::cerr << thread_id << "(on CPU " << sched_getcpu() << "): duration = " << duration.count() << "us" << std::endl;
 }
 
 int main(int argc, char **argv) {
@@ -104,9 +101,9 @@ int main(int argc, char **argv) {
   int n;
   Dispatch(n, num_threads, data);
 
-  //for (int i = 0; i < num_threads; i++) {
-  //  printf("%5d: %d\n", i, data[i]->size());
-  //}
+  for (int i = 0; i < num_threads; i++) {
+    printf("%5d: %d\n", i, data[i]->size());
+  }
 
   int *ans = new int[n];
 
@@ -114,13 +111,12 @@ int main(int argc, char **argv) {
   Operation **ops = new Operation*[num_threads];
   for (int i = 0; i < num_threads; i++) {
 	  ni[i] = data[i]->size();
-	  ops[i] = new Operation[ni[i]];
+	  ops[i] = new Operation[ni[i] + 1];
 	  for (int j = 0; j < ni[i]; j++) {
 		  ops[i][j] = (*data[i])[j];
 	  }
   }
 
-  Init();
 
 //  printf("...\n");
 //  getchar();
